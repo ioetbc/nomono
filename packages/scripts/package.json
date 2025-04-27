@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "@monorepo-template/core": "*",
+    "@monorepo-template/core": "workspace:*",
+    "@monorepo-template/db": "workspace:*",
     "sst": "*"
   },
   "scripts": {
