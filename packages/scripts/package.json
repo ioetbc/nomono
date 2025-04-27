@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@monorepo-template/db": "workspace:*",
+    "drizzle-seed": "^0.3.1",
     "sst": "*"
   },
   "scripts": {
