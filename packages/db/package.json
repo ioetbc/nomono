@@ -1,5 +1,5 @@
 {
-  "name": "@monorepo-template/core",
+  "name": "@monorepo-template/db",
   "type": "module",
   "version": "0.0.0",
   "scripts": {
@@ -7,13 +7,10 @@
     "db": "sst shell drizzle-kit"
   },
   "exports": {
-    "./*": [
-      "./src/*/index.ts",
-      "./src/*.ts",
-      "./src/*/*.ts"
-    ]
+    ".": "./index.ts"
   },
   "dependencies": {
+    "drizzle-orm": "^0.43.1",
     "sst": "*"
   },
   "devDependencies": {

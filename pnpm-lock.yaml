@@ -31,8 +31,11 @@ importers:
         specifier: ^5
         version: 5.8.3
 
-  packages/core:
+  packages/db:
     dependencies:
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.11.14)(pg@8.15.6)
       sst:
         specifier: '*'
         version: 3.13.19
@@ -41,17 +44,11 @@ importers:
         specifier: ^2
         version: 2.1.9(@types/node@22.15.2)
 
-  packages/db:
-    dependencies:
-      sst:
-        specifier: ^3.13.19
-        version: 3.13.19
-
   packages/functions:
     dependencies:
-      '@monorepo-template/core':
+      '@monorepo-template/db':
         specifier: workspace:*
-        version: link:../core
+        version: link:../db
       sst:
         specifier: '*'
         version: 3.13.19
@@ -62,9 +59,6 @@ importers:
 
   packages/scripts:
     dependencies:
-      '@monorepo-template/core':
-        specifier: workspace:*
-        version: link:../core
       '@monorepo-template/db':
         specifier: workspace:*
         version: link:../db

@@ -1,5 +1,5 @@
 import { Handler } from "aws-lambda";
-import { todo, db } from "@monorepo-template/core/db";
+import { todo, db } from "@monorepo-template/db";
 
 export const handler: Handler = async (_event) => {
   if (_event.requestContext.http.method === "GET") {
@@ -15,7 +15,7 @@ export const handler: Handler = async (_event) => {
     try {
       const result = await db
         .insert(todo)
-        .values({ title: "Another one Todo", description: crypto.randomUUID() })
+        .values({ title: "What one Todo", description: crypto.randomUUID() })
         .returning()
         .execute();
 
