@@ -26,5 +26,14 @@ export default $config({
       link: [rds],
       handler: "packages/functions/src/api.handler",
     });
+
+    const admin_website = new sst.aws.React("Admin", {
+      path: "apps/admin",
+      link: [rds],
+    });
+
+    return {
+      admin_url: admin_website.url,
+    };
   },
 });

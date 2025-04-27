@@ -1,7 +1,9 @@
 {
   "name": "monorepo-template",
   "version": "0.0.0",
-  "scripts": {},
+  "scripts": {
+    "db": "sst shell drizzle-kit"
+  },
   "devDependencies": {
     "@tsconfig/node22": "^22",
     "@types/pg": "^8.11.14",

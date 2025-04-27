@@ -5,6 +5,10 @@
 
 declare module "sst" {
   export interface Resource {
+    "Admin": {
+      "type": "sst.aws.React"
+      "url": string
+    }
     "MyApi": {
       "name": string
       "type": "sst.aws.Function"
