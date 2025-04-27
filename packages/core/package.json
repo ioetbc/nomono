@@ -3,12 +3,14 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "test": "sst shell vitest"
+    "test": "sst shell vitest",
+    "db": "sst shell drizzle-kit"
   },
   "exports": {
     "./*": [
       "./src/*/index.ts",
-      "./src/*.ts"
+      "./src/*.ts",
+      "./src/*/*.ts"
     ]
   },
   "dependencies": {

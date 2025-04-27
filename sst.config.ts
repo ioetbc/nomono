@@ -10,11 +10,21 @@ export default $config({
     };
   },
   async run() {
-    const storage = await import("./infra/storage");
-    await import("./infra/api");
+    const vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "managed" });
+    const rds = new sst.aws.Postgres("MyPostgres", { vpc, proxy: true });
 
-    return {
-      MyBucket: storage.bucket.name,
-    };
+    new sst.x.DevCommand("Studio", {
+      link: [rds],
+      dev: {
+        command: "npx drizzle-kit studio",
+      },
+    });
+
+    new sst.aws.Function("MyApi", {
+      vpc,
+      url: true,
+      link: [rds],
+      handler: "packages/functions/src/api.handler",
+    });
   },
 });
