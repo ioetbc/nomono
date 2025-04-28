@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@monorepo-template/db": "workspace:*",
+    "@monorepo-template/services": "workspace:*",
     "sst": "*"
   },
   "devDependencies": {

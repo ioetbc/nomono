@@ -1,0 +1,19 @@
+{
+  "name": "@monorepo-template/services",
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "sst shell vitest"
+  },
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "sst": "*"
+  },
+  "devDependencies": {
+    "@swc-node/register": "^1.10.10",
+    "@swc/core": "^1.11.22",
+    "vitest": "^2"
+  }
+}

@@ -134,6 +134,9 @@ importers:
       '@monorepo-template/db':
         specifier: workspace:*
         version: link:../db
+      '@monorepo-template/services':
+        specifier: workspace:*
+        version: link:../services
       sst:
         specifier: '*'
         version: 3.13.19
@@ -160,6 +163,22 @@ importers:
       tsx:
         specifier: ^4
         version: 4.19.3
+
+  packages/services:
+    dependencies:
+      sst:
+        specifier: '*'
+        version: 3.13.19
+    devDependencies:
+      '@swc-node/register':
+        specifier: ^1.10.10
+        version: 1.10.10(@swc/core@1.11.22)(@swc/types@0.1.21)(typescript@5.8.3)
+      '@swc/core':
+        specifier: ^1.11.22
+        version: 1.11.22
+      vitest:
+        specifier: ^2
+        version: 2.1.9(@types/node@22.15.2)
 
 packages:
 
