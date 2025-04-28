@@ -5,7 +5,7 @@
   "scripts": {
     "test": "sst shell vitest",
     "db": "sst shell drizzle-kit",
-    "seed": "sst shell \"node --no-warnings=ExperimentalWarning --loader @swc-node/register/esm ./seed.ts\""
+    "seed": "sst shell tsx ./seed.ts"
   },
   "exports": {
     ".": "./index.ts"

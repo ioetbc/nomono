@@ -8,11 +8,11 @@ import {
 
 import type { Route } from "./+types/root";
 import appStylesHref from "./app.css?url";
-import { createEmptyContact } from "./data";
+import { createEmptyExhibition } from "./data";
 
 export async function action() {
-	const contact = await createEmptyContact();
-	return redirect(`/contacts/${contact.id}/edit`);
+	const exhibition = await createEmptyExhibition();
+	return redirect(`/exhibitions/${exhibition.id}/edit`);
 }
 
 export default function App() {

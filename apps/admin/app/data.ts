@@ -3,7 +3,6 @@ import sortBy from "sort-by";
 
 import {
 	type Exhibition,
-	contacts,
 	create_db,
 	exhibition,
 	images,
@@ -120,25 +119,23 @@ export async function getDrizzleExhibition(id: number) {
 	};
 }
 
-export async function createDrizzleEmptyContact() {
-	const newContact = await db
-		.insert(contacts)
+export async function createDrizzleEmptyExhibition() {
+	const newExhibition = await db
+		.insert(exhibition)
 		.values({
 			created_at: new Date(),
 			name: "",
-			favorite: false,
+			description: "",
+			url: "",
+			gallery_id: null,
+			recommended: false,
+			start_date: null,
+			end_date: null,
 		})
 		.returning();
 
 	return {
-		id: newContact[0].id,
-		createdAt: new Date(newContact[0].created_at).toISOString(),
-		first: "",
-		last: "",
-		avatar: newContact[0].avatar || undefined,
-		twitter: newContact[0].twitter || undefined,
-		notes: newContact[0].notes || undefined,
-		favorite: newContact[0].favorite || false,
+		id: newExhibition[0].id,
 	};
 }
 
@@ -183,49 +180,7 @@ export async function deleteDrizzleExhibition(id: number) {
 	return null;
 }
 
-// Initialize the database with sample data
-async function initializeDrizzleData() {
-	const existingContacts = await db
-		.select({ count: contacts.id })
-		.from(contacts);
 
-	if (existingContacts.length === 0) {
-		const sampleContacts = [
-			{
-				avatar:
-					"https://sessionize.com/image/124e-400o400o2-wHVdAuNaxi8KJrgtN3ZKci.jpg",
-				name: "Shruti Kapoor",
-				twitter: "@shrutikapoor08",
-			},
-			{
-				avatar:
-					"https://sessionize.com/image/1940-400o400o2-Enh9dnYmrLYhJSTTPSw3MH.jpg",
-				name: "Glenn Reyes",
-				twitter: "@glnnrys",
-			},
-			{
-				avatar:
-					"https://sessionize.com/image/9273-400o400o2-3tyrUE3HjsCHJLU5aUJCja.jpg",
-				name: "Ryan Florence",
-			},
-		];
-
-		for (const contact of sampleContacts) {
-			await db.insert(contacts).values({
-				created_at: new Date(),
-				name: contact.name,
-				avatar: contact.avatar,
-				twitter: contact.twitter,
-				favorite: false,
-			});
-		}
-	}
-}
-
-// Init database (keep for backward compatibility)
-initializeDrizzleData().catch(console.error);
-
-// Export renamed functions to match the original API
 // Image API functions
 export type ImageRecord = {
 	id: number;
@@ -321,6 +276,6 @@ export async function deleteImage(id: number): Promise<null> {
 }
 
 export const getExhibition = getDrizzleExhibition;
-export const createEmptyContact = createDrizzleEmptyContact;
+export const createEmptyExhibition = createDrizzleEmptyExhibition;
 export const updateExhibition = updateDrizzleExhibition;
 export const deleteExhibition = deleteDrizzleExhibition;

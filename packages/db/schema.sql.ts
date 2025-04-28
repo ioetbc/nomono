@@ -1,27 +1,6 @@
 import { text, serial, pgTable, boolean, integer, primaryKey, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-
-
-export const todo = pgTable("todo", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-});
-
-
-
-// Define the contacts table
-export const contacts = pgTable("contacts", {
-	id: serial("id").primaryKey(),
-	created_at: timestamp("created_at").notNull().defaultNow(),
-	name: text("name").notNull(),
-	avatar: text("avatar"),
-	twitter: text("twitter"),
-	notes: text("notes"),
-	favorite: boolean("favorite").default(false),
-});
-
 // Define the gallery table
 export const gallery = pgTable("gallery", {
 	id: serial("id").primaryKey(),
@@ -90,16 +69,16 @@ export const images = pgTable("images", {
 });
 
 // Define relations
-export const exhibitionRelations = relations(exhibition, ({ many }) => ({
+export const exhibition_relations = relations(exhibition, ({ many }) => ({
 	images: many(images),
 	artists: many(exhibition_artists),
 }));
 
-export const artistsRelations = relations(artists, ({ many }) => ({
+export const artists_relations = relations(artists, ({ many }) => ({
 	exhibitions: many(exhibition_artists),
 }));
 
-export const exhibition_artistsRelations = relations(
+export const exhibition_artists_relations = relations(
 	exhibition_artists,
 	({ one }) => ({
 		exhibition: one(exhibition, {
@@ -113,16 +92,13 @@ export const exhibition_artistsRelations = relations(
 	}),
 );
 
-export const imagesRelations = relations(images, ({ one }) => ({
+export const images_relations = relations(images, ({ one }) => ({
 	exhibition: one(exhibition, {
 		fields: [images.exhibition_id],
 		references: [exhibition.id],
 	}),
 }));
 
-// Define types based on the schema
-export type Contact = typeof contacts.$inferSelect;
-export type NewContact = typeof contacts.$inferInsert;
 export type Gallery = typeof gallery.$inferSelect;
 export type NewGallery = typeof gallery.$inferInsert;
 export type Exhibition = typeof exhibition.$inferSelect;
@@ -135,10 +111,13 @@ export type Image = typeof images.$inferSelect;
 export type NewImage = typeof images.$inferInsert;
 
 export default {
-  contacts,
   gallery,
   exhibition,
   artists,
   images,
-	exhibition_artists
-}
+	exhibition_artists,
+	exhibition_relations,
+	artists_relations,
+	exhibition_artists_relations,
+	images_relations,
+};
