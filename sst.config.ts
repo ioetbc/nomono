@@ -12,6 +12,7 @@ export default $config({
   async run() {
     const vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "managed" });
     const rds = new sst.aws.Postgres("MyPostgres", { vpc, proxy: true });
+    const openai_api_key = new sst.Secret("OPENAI_API_KEY");
 
     new sst.x.DevCommand("Studio", {
       link: [rds],
@@ -25,10 +26,18 @@ export default $config({
       url: true,
       link: [rds],
       handler: "packages/functions/src/api.handler",
+      memory: "2 GB",
+      timeout: "15 minutes",
+      nodejs: {
+        install: ["@sparticuz/chromium"],
+      },
+      environment: {
+        OPENAI_API_KEY: openai_api_key.value,
+      },
     });
 
     const admin_website = new sst.aws.React("Admin", {
-      vpc, // TODO remove this ans see if it still works?
+      vpc,
       path: "apps/admin",
       link: [rds],
     });

@@ -2,11 +2,13 @@ import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import * as cheerio from "cheerio";
 import { format, isAfter } from "date-fns";
-import { type Browser, type Page, launch } from "puppeteer";
+import { type Page } from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import TurndownService from "turndown";
 import prompts from "../llm/prompts/index";
 import schemas, { type Event } from "../schema/index";
-import { blocked_image_domains, blocked_image_extensions } from "../consts"
+import { blocked_image_domains, blocked_image_extensions, LOCAL_CHROMIUM_PATH } from "../consts"
 
 type PageMap = {
 	page: Page | undefined;
@@ -15,7 +17,7 @@ type PageMap = {
 
 export class EventScraper {
 	pages: Map<string, PageMap>;
-	browser: Browser | undefined;
+	browser: any | undefined
 	current_date: string;
 
 	constructor() {
@@ -26,10 +28,16 @@ export class EventScraper {
 
 	launch_browser = async () => {
 		console.log("launching new browser");
-		this.browser = await launch({
-			headless: true,
-			args: ["--no-sandbox", "--disable-gpu"],
+		const thing = await puppeteer.launch({
+			args: chromium.args,
+			defaultViewport: chromium.defaultViewport,
+			executablePath: process.env.SST_DEV
+				? LOCAL_CHROMIUM_PATH
+				: await chromium.executablePath(),
+			headless: chromium.headless,
 		});
+
+		this.browser = thing;
 		this.pages = new Map();
 	};
 
@@ -451,7 +459,6 @@ export class EventScraper {
 			const events = await this.find_events(all_events_page_text, hrefs);
 
 			console.log("events.length", events.length);
-			console.log("events", events);
 
 			if (events.length === 0) {
 				console.log("no events found for:", url);
@@ -461,7 +468,7 @@ export class EventScraper {
 
 			// const seen_exhibitions = await db.get_seen_exhibitions(); // this.db
 
-			await Promise.allSettled(
+			const results = await Promise.allSettled(
 				events.map(async (event) => {
 					// filter events instead of this
 					const { should_skip, reason } = await this.block_event(
@@ -567,13 +574,15 @@ export class EventScraper {
 						return;
 					}
 
+					return payload;
+
 					// await db.insert_exhibition(payload);
 					// await this.insert_seen_exhibition(event.name, gallery_id);
-					await this.close_page(event.event_page_url, "Done");
+					// await this.close_page(event.event_page_url, "Done");
 				}),
 			);
 
-			return events;
+			return results;
 		} catch (error) {
 			console.log("error scraping url:", error);
 			console.error("Error processing main page:", error);

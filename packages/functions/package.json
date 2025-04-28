@@ -5,6 +5,7 @@
   "dependencies": {
     "@monorepo-template/db": "workspace:*",
     "@monorepo-template/services": "workspace:*",
+    "@sparticuz/chromium": "127.0.0",
     "sst": "*"
   },
   "devDependencies": {

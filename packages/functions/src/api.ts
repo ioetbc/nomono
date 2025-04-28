@@ -1,20 +1,46 @@
 import { Handler } from "aws-lambda";
-import { Greeting } from "@monorepo-template/services";
+import { EventScraper } from "@monorepo-template/services";
+import { db, gallery } from "@monorepo-template/db";
 
 export const handler: Handler = async (_event) => {
-  if (_event.requestContext.http.method === "GET") {
-    const greetingService = new Greeting();
-    const name = _event.queryStringParameters?.name || "User";
-    const greeting = greetingService.sayHello(name);
+	const scraper = new EventScraper();
+
+	const galleries = await db.select().from(gallery).execute();
+	const done = [];
+
+	for (const gallery of galleries) {
+		if (gallery.name === "Cardi Gallery") continue;
+
+    // update schema to be strict on this
+		if (!gallery.url) {
+			console.log(`no url for ${gallery.name}`);
+			continue;
+		}
+
+		const results = await scraper.handler(gallery.url, gallery.id);
+
+    if (!results) {
+      console.log("no results");
+      continue;
+    }
+
+    const gallery_exhibitions = results.map((result) => {
+      if (result.status === "fulfilled" && result.value) {
+        return result.value;
+      }
+
+      return null;
+    }).filter(Boolean);
+
+		if (gallery_exhibitions.length > 0) {
+      done.push(...gallery_exhibitions);
+    }
+
+		console.log(`done ${done.length} galleries processed: ${galleries.length}`);
+	}
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: greeting }),
+      body: JSON.stringify({ done }, null, 4),
     };
-  }
-
-  return {
-    statusCode: 500,
-    body: JSON.stringify({ error: "Unsupported HTTP method" }),
-  };
 };
