@@ -1,1 +1,1 @@
-export { Greeting } from "./src/greeting";
+export { EventScraper } from "./src/event-scraper";
