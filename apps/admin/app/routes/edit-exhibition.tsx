@@ -14,7 +14,9 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const formData = await request.formData();
 	const intent = formData.get("intent");
 
-	const exhibitionId = Number(params.thing);
+	console.log('params', params);
+
+	const exhibitionId = Number(params.exhibition_id);
 	if (Number.isNaN(exhibitionId)) {
 		throw new Response("Invalid exhibition ID", { status: 400 });
 	}
@@ -73,7 +75,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
-	const exhibition = await getExhibition(Number(params.exhibitionId));
+	const exhibition = await getExhibition(Number(params.exhibition_id));
 	if (!exhibition) {
 		throw new Response("Not Found", { status: 404 });
 	}
