@@ -1,12 +1,10 @@
 import {
 	type NewArtist,
-	type NewContact,
 	type NewExhibition,
 	type NewExhibitionArtist,
 	type NewGallery,
 	type NewImage,
 	artists,
-	contacts,
 	create_db,
 	exhibition,
 	exhibition_artists,
@@ -24,7 +22,6 @@ async function seed() {
 		await db.delete(exhibition);
 		await db.delete(artists);
 		await db.delete(gallery);
-		await db.delete(contacts);
 		console.log("Cleared existing data from all tables");
 	} catch (error) {
 		console.error("Error setting up tables:", error);
@@ -103,18 +100,6 @@ async function seed() {
 	];
 
 	try {
-		// Insert contacts
-		for (const contact of contactsData) {
-			await db.insert(contacts).values({
-				name: `${contact.first} ${contact.last}`,
-				avatar: contact.avatar,
-				twitter: contact.twitter,
-				favorite: false,
-			} satisfies NewContact);
-
-			console.log(`Added contact: ${contact.first} ${contact.last}`);
-		}
-
 		// Sample gallery data
 		const galleryData = [
 			{

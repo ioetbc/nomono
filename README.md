@@ -6,3 +6,16 @@ get todos from db via lambda:
 
 post todos from db via lambda:
 `curl -X POST https://4xov3zqpq7khx2fbzrbk5ajkdy0hqznd.lambda-url.eu-north-1.on.aws/`
+
+tunnel into staging / prod db
+
+terminal (1)
+npx sst tunnel --stage staging
+
+terminal (2)
+- migrate
+`SST_STAGE=staging npx sst shell -- pnpm db migrate`
+
+- seed
+`cd packages/db`
+`SST_STAGE=staging npx sst shell -- pnpm seed`

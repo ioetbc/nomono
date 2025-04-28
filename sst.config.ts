@@ -28,6 +28,7 @@ export default $config({
     });
 
     const admin_website = new sst.aws.React("Admin", {
+      vpc, // TODO remove this ans see if it still works?
       path: "apps/admin",
       link: [rds],
     });
