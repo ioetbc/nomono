@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.798.0",
     "@monorepo-template/db": "workspace:*",
     "@monorepo-template/services": "workspace:*",
     "@sparticuz/chromium": "127.0.0",

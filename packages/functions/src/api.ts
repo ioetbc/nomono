@@ -1,25 +1,25 @@
 import { Handler } from "aws-lambda";
-import { EventScraper } from "@monorepo-template/services";
-import { db, gallery } from "@monorepo-template/db";
+import { db, exhibition } from "@monorepo-template/db";
 
 export const handler: Handler = async (_event) => {
-	const scraper = new EventScraper();
 
-	const galleries = await db.select().from(gallery).execute();
-	const done = [];
+	// const scraper = new EventScraper();
 
-	for (const gallery of galleries) {
-		const results = await scraper.handler(gallery.url, gallery.id);
+	const exhibitions = await db.query.exhibition.findMany();
+	// const done = [];
 
-    if (!!results?.length) {
-        done.push(...results);
-    }
+	// for (const gallery of galleries) {
+	// 	const results = await scraper.handler(gallery.url, gallery.id);
 
-		console.log(`done ${done.length} galleries processed: ${galleries.length}`);
-	}
+  //   if (!!results?.length) {
+  //       done.push(...results);
+  //   }
+
+	// 	console.log(`done ${done.length} galleries processed: ${galleries.length}`);
+	// }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ done }, null, 4),
+      body: JSON.stringify({ exhibitions }, null, 4),
     };
 };

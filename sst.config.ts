@@ -10,22 +10,35 @@ export default $config({
     };
   },
   async run() {
-    const vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "managed" });
-    const rds = new sst.aws.Postgres("MyPostgres", { vpc, proxy: true });
+    const vpc = new sst.aws.Vpc("Vpc", { bastion: true, nat: "managed" });
+    const rds = new sst.aws.Postgres("Postgres", { vpc, proxy: true });
     const openai_api_key = new sst.Secret("OPENAI_API_KEY");
+    
+    const BASE_API_URL = 'packages/functions/src'
 
-    new sst.x.DevCommand("Studio", {
+    new sst.x.DevCommand("DrizzleStudio", {
       link: [rds],
       dev: {
         command: "npx drizzle-kit studio",
       },
     });
 
-    new sst.aws.Function("MyApi", {
+    const queue = new sst.aws.Queue("ScraperQueue");
+    
+    // consumer of the queue
+    queue.subscribe({
+      name: "Consumer",
+      handler: `${BASE_API_URL}/consumer.handler`,
+      link: [rds],
+      vpc,
+    });
+
+    // producer of the queue
+    new sst.aws.Function("Producer", {
       vpc,
       url: true,
-      link: [rds],
-      handler: "packages/functions/src/api.handler",
+      link: [rds, queue],
+      handler: `${BASE_API_URL}/producer.handler`,
       memory: "2 GB",
       timeout: "15 minutes",
       nodejs: {
@@ -34,6 +47,13 @@ export default $config({
       environment: {
         OPENAI_API_KEY: openai_api_key.value,
       },
+    });
+
+    new sst.aws.Function("GetExhibitions", {
+      vpc,
+      url: true,
+      link: [rds],
+      handler: `${BASE_API_URL}/api.handler`,
     });
 
     const admin_website = new sst.aws.React("Admin", {

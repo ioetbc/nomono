@@ -9,12 +9,16 @@ declare module "sst" {
       "type": "sst.aws.React"
       "url": string
     }
-    "MyApi": {
+    "GetExhibitions": {
       "name": string
       "type": "sst.aws.Function"
       "url": string
     }
-    "MyPostgres": {
+    "OPENAI_API_KEY": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "Postgres": {
       "database": string
       "host": string
       "password": string
@@ -22,13 +26,18 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
-    "MyVpc": {
+    "Producer": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "ScraperQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "Vpc": {
       "bastion": string
       "type": "sst.aws.Vpc"
-    }
-    "OPENAI_API_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
     }
   }
 }

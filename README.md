@@ -19,3 +19,8 @@ terminal (2)
 - seed
 `cd packages/db`
 `SST_STAGE=staging npx sst shell -- pnpm seed`
+
+### sqs
+
+- How to add items to sqs queue
+- `curl https://jfbp35gdb5ycpcrqqloavhx4yy0pkdem.lambda-url.eu-north-1.on.aws/`
