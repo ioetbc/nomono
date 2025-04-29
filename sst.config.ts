@@ -13,7 +13,7 @@ export default $config({
     const vpc = new sst.aws.Vpc("Vpc", { bastion: true, nat: "managed" });
     const rds = new sst.aws.Postgres("Postgres", { vpc, proxy: true });
     const openai_api_key = new sst.Secret("OPENAI_API_KEY");
-    
+
     const BASE_API_URL = 'packages/functions/src'
 
     new sst.x.DevCommand("DrizzleStudio", {
@@ -23,7 +23,17 @@ export default $config({
       },
     });
 
-    const queue = new sst.aws.Queue("ScraperQueue");
+    // DLQ for failed messages
+    const deadLetterQueue = new sst.aws.Queue("DLQ");
+    
+    // Main queue
+    const queue = new sst.aws.Queue("ScraperQueue", {
+        dlq: {
+        retry: 5,
+        queue: deadLetterQueue.arn,
+      },
+      visibilityTimeout: "5 minutes",
+    });
     
     // consumer of the queue
     queue.subscribe({
@@ -31,6 +41,14 @@ export default $config({
       handler: `${BASE_API_URL}/consumer.handler`,
       link: [rds],
       vpc,
+      environment: {
+        OPENAI_API_KEY: openai_api_key.value,
+      },
+      memory: "2 GB",
+      timeout: "5 minutes",
+      nodejs: {
+        install: ["@sparticuz/chromium"],
+      },
     });
 
     // producer of the queue
@@ -39,14 +57,6 @@ export default $config({
       url: true,
       link: [rds, queue],
       handler: `${BASE_API_URL}/producer.handler`,
-      memory: "2 GB",
-      timeout: "15 minutes",
-      nodejs: {
-        install: ["@sparticuz/chromium"],
-      },
-      environment: {
-        OPENAI_API_KEY: openai_api_key.value,
-      },
     });
 
     new sst.aws.Function("GetExhibitions", {

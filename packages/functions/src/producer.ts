@@ -1,42 +1,58 @@
 import { SQSClient, SendMessageBatchCommand } from "@aws-sdk/client-sqs";
+import { db } from "@monorepo-template/db";
 import { Resource } from "sst";
+import crypto from "crypto";
 
 const sqs = new SQSClient({});
 
-// Generate an array of 300 sample items
-const generate_messages = () => {
-  return Array.from({ length: 20 }, (_, i) => ({
-    id: `item-${i + 1}`,
-    timestamp: new Date().toISOString(),
-    value: Math.floor(Math.random() * 1000),
-    description: `Sample item ${i + 1} for processing`,
-    url: `exhibition-url.com/${i + 1}`
-  }));
-};
-
-// Send items to SQS queue in batches of 10 (SQS batch limit is 10 messages)
-const sendMessagesToQueue = async (queueUrl: string, items: any[]) => {
+const add_messages_to_queue = async (queueUrl: string, items: any[]) => {
   const results = [];
   
-  // Process in batches of 10
-  for (let i = 0; i < items.length; i += 10) {
-    const batch = items.slice(i, i + 10);
+  // Filter out duplicates by URL to avoid unnecessary processing
+  const uniqueItems = items.filter((item, index, self) => 
+    index === self.findIndex((t) => t.url === item.url)
+  );
+  
+  console.log(`Filtered ${items.length - uniqueItems.length} duplicate gallery URLs`);
+  
+  for (let i = 0; i < uniqueItems.length; i += 10) {
+    const batch = uniqueItems.slice(i, i + 10);
     
     const command = new SendMessageBatchCommand({
       QueueUrl: queueUrl,
-      Entries: batch.map((item, index) => ({
-        Id: `${i + index}`, // Unique ID for this batch entry
-        MessageBody: JSON.stringify(item),
-      })),
+      Entries: batch.map((item) => {
+        // Create a stable, unique message ID based on content to help with deduplication
+        const messageId = crypto.createHash('md5').update(item.url).digest('hex');
+        
+        return {
+          Id: messageId, // Stable ID based on content
+          MessageBody: JSON.stringify(item),
+          // Add deduplication ID for FIFO queues if needed
+          // MessageDeduplicationId: messageId,
+          // Add message attributes to help with filtering if needed
+          MessageAttributes: {
+            'GalleryId': {
+              DataType: 'Number',
+              StringValue: item.id.toString()
+            },
+          }
+        };
+      }),
     });
     
     try {
       const result = await sqs.send(command);
       results.push(result);
-      console.log(`Successfully sent batch ${i / 10 + 1} of ${Math.ceil(items.length / 10)}`);
+      console.log(`Successfully sent batch ${i / 10 + 1} of ${Math.ceil(uniqueItems.length / 10)}`);
+      
+      // Report any failed message entries
+      if (result.Failed && result.Failed.length > 0) {
+        console.warn(`Failed to send ${result.Failed.length} messages:`, result.Failed);
+      }
     } catch (error) {
       console.error(`Error sending batch ${i / 10 + 1}:`, error);
-      throw error;
+      // Log error but continue with other batches
+      continue;
     }
   }
   
@@ -45,10 +61,9 @@ const sendMessagesToQueue = async (queueUrl: string, items: any[]) => {
 
 export const handler = async () => {
   try {
-    const messages = generate_messages();
-    console.log(`Generated ${messages.length} items to send to queue`);
-    const results = await sendMessagesToQueue(Resource.ScraperQueue.url, messages);
-    
+    const messages = await db.query.gallery.findMany();
+    const results = await add_messages_to_queue(Resource.ScraperQueue.url, messages);
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },

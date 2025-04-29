@@ -9,6 +9,10 @@ declare module "sst" {
       "type": "sst.aws.React"
       "url": string
     }
+    "DLQ": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
     "GetExhibitions": {
       "name": string
       "type": "sst.aws.Function"
