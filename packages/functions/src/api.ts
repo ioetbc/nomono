@@ -9,31 +9,10 @@ export const handler: Handler = async (_event) => {
 	const done = [];
 
 	for (const gallery of galleries) {
-		if (gallery.name === "Cardi Gallery") continue;
-
-    // update schema to be strict on this
-		if (!gallery.url) {
-			console.log(`no url for ${gallery.name}`);
-			continue;
-		}
-
 		const results = await scraper.handler(gallery.url, gallery.id);
 
-    if (!results) {
-      console.log("no results");
-      continue;
-    }
-
-    const gallery_exhibitions = results.map((result) => {
-      if (result.status === "fulfilled" && result.value) {
-        return result.value;
-      }
-
-      return null;
-    }).filter(Boolean);
-
-		if (gallery_exhibitions.length > 0) {
-      done.push(...gallery_exhibitions);
+    if (!!results?.length) {
+        done.push(...results);
     }
 
 		console.log(`done ${done.length} galleries processed: ${galleries.length}`);
