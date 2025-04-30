@@ -17,7 +17,7 @@ export const blocked_domains = [
 	"http://www.google.com",
 ];
 
-export const blocked_image_domains = ["https://i.vimeocdn.com"];
+export const blocked_image_domains = ["https://i.vimeocdn.com", "data:image"];
 
 export const blocked_image_extensions = [".svg", ".gif", ".ico"];
 

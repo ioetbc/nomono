@@ -132,7 +132,25 @@ export class EventScraper {
 		}
 
 		const image_urls = dom("img")
-			.map((_, img) => dom(img).attr("data-srcset") ?? dom(img).attr("src"))
+			.map((_, img) => {
+				let src;
+				const dataResponsiveSrc = dom(img).attr("data-responsive-src");
+				if (dataResponsiveSrc) {
+					try {
+						const parsedSrc = JSON.parse(dataResponsiveSrc.replace(/'/g, '"'));
+						const breakpoints = Object.keys(parsedSrc).sort((a, b) => parseInt(b) - parseInt(a));
+						src = parsedSrc[breakpoints[0]]; // Choose the largest available breakpoint
+					} catch (error) {
+						console.error("Error parsing data-responsive-src:", error);
+					}
+				}
+				src = src ?? dom(img).attr("data-srcset") ?? dom(img).attr("src");
+				if (src && (src.startsWith("/") || src.startsWith("//"))) {
+					const baseUrl = new URL(current_page?.page?.url() ?? "");
+					src = new URL(src, baseUrl.origin).href;
+				}
+				return src;
+			})
 			.get();
 
 		const filtered_image_urls = image_urls.filter(
@@ -141,6 +159,8 @@ export class EventScraper {
 					url.endsWith(extension),
 				) && !blocked_image_domains.some((domain) => url.startsWith(domain)),
 		);
+
+		console.log("filtered_image_urls", filtered_image_urls);
 
 		const unique_image_urls = new Set(filtered_image_urls);
 
@@ -414,7 +434,7 @@ export class EventScraper {
 			start_and_end_date,
 			featured_artists,
 			exhibition_name,
-			image_urls,
+			// image_urls,
 			details,
 			is_ticketed,
 		] = await Promise.all([
@@ -422,17 +442,20 @@ export class EventScraper {
 			this.extract_start_end_date(page_text),
 			this.extract_featured_artists(page_text),
 			this.extract_exhibition_name(page_text),
-			this.extract_image_urls(images),
+			// this.extract_image_urls(images),
 			this.extract_details(page_text),
 			this.extract_is_ticketed(page_text),
 		]);
+
+		console.log("featured_artists HERE", featured_artists);
 
 		return {
 			private_view,
 			start_and_end_date,
 			featured_artists: featured_artists?.featured_artists ?? [],
 			exhibition_name: exhibition_name?.exhibition_name ?? null,
-			image_urls: image_urls?.urls ?? [],
+			// image_urls: image_urls?.urls ?? [],
+			image_urls: images,
 			details: details?.details ?? null,
 			is_ticketed: is_ticketed?.is_ticketed ?? null,
 		};
@@ -531,9 +554,9 @@ export class EventScraper {
 					const payload = {
 						exhibition_name: details.exhibition_name ?? null,
 						info: details?.details ?? null,
-						featured_artists: JSON.stringify(details.featured_artists ?? []),
+						featured_artists: details.featured_artists ?? [],
 						exhibition_page_url: event.event_page_url,
-						image_urls: JSON.stringify(details.image_urls ?? []),
+						image_urls: details.image_urls ?? [],
 						is_ticketed: !!details.is_ticketed,
 						start_date: this.convert_date(
 							details.start_and_end_date?.start_date ??

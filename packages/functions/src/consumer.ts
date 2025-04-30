@@ -1,5 +1,5 @@
 import { Handler } from "aws-lambda";
-import { artists, db, exhibition, images } from "@monorepo-template/db";
+import { artists, db, exhibition, exhibition_artists, images } from "@monorepo-template/db";
 import { EventScraper } from "../../services/src/event-scraper";
 
 export const handler: Handler = async (_event) => {
@@ -36,20 +36,27 @@ export const handler: Handler = async (_event) => {
               }
             );
 
-            const image_urls = JSON.parse(result.value?.image_urls ?? '[]');
-
-            for (const image_url of image_urls) {
+            for (const image_url of result.value?.image_urls) {
               await db.insert(images).values({
                 image_url: image_url,
                 exhibition_id: exhibition_response[0].id
               });
             }
 
-            const featured_artists = JSON.parse(result.value?.featured_artists ?? '[]');
+            console.log('inserting artists', JSON.stringify(result.value?.featured_artists));
 
-            for (const artist of featured_artists) {
-              await db.insert(artists).values({
+            for (const artist of result.value?.featured_artists) {
+              const artist_response = await db.insert(artists).values({
                 name: artist,
+              }).returning(
+                {
+                  id: artists.id,
+                }
+              );
+
+              await db.insert(exhibition_artists).values({
+                exhibition_id: exhibition_response[0].id,
+                artist_id: artist_response[0].id,
               });
             }
 

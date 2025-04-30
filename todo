@@ -1,0 +1,16 @@
+[] on submit of exhibition delete image and save version of image in s3 save url in db
+[] add caption to image
+[] create placeholder image and add to s3 + save in db
+[] view to see live events
+[] ability to edit artists
+[] run scraper from admin panel
+[] move open website button next to edit and delete buttons
+[] make migrations easier move drizzle config to db package
+[] move evals test over
+[] add gallery address & opening times relations
+[] some events are being duplicated BANZ and compositions - figure out why
+[] going back to images - huxley parlour url is multiple urls - look at fittings exhibitition
+[] when you seed reset the sequence ids back to 0
+[] add back in seen events?
+[] have a look at the dlq there are two messages on it
+[] make next app work with the new db

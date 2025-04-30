@@ -1,4 +1,4 @@
-import { text, serial, pgTable, boolean, integer, primaryKey, timestamp } from "drizzle-orm/pg-core";
+import { text, serial, pgTable, boolean, integer, primaryKey, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Define the gallery table
@@ -98,6 +98,19 @@ export const images_relations = relations(images, ({ one }) => ({
 		references: [exhibition.id],
 	}),
 }));
+
+export const job_status_enum = pgEnum("job_status_enum", ["pending", "running", "completed", "failed"]);
+
+export const job_status = pgTable("job_status", {
+	id: serial("id").primaryKey(),
+	status: job_status_enum("job_status_enum").notNull(),
+	total: integer("total").notNull().default(0),
+	failed: integer("failed").notNull().default(0),
+	completed: integer("completed").notNull().default(0),
+	created_at: timestamp("created_at").notNull().defaultNow(),
+	updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
 
 export type Gallery = typeof gallery.$inferSelect;
 export type NewGallery = typeof gallery.$inferInsert;
