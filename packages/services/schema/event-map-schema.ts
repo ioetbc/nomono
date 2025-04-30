@@ -6,7 +6,6 @@ export const event_map_schema = z.object({
 			name: z.string().describe("the name of the event"),
 			event_page_url: z
 				.string()
-				.url()
 				.describe("the event page url")
 				.nullable(),
 			start_date: z.string().describe("the start date of the event").nullable(),

@@ -55,6 +55,7 @@ export const start_and_end_date_prompt = ({
     You must only use the "Markdown file" and not fabricate or make up any dates.
     You must not make up dates.
     Convert all dates to ISO 8601 format.
+    If a year is not provided, use the current year (2025).
     All dates in these instructions are for demonstration purposes. Do not use them in your response.
   </important>
 `,

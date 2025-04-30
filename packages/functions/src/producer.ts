@@ -1,5 +1,5 @@
 import { SQSClient, SendMessageBatchCommand } from "@aws-sdk/client-sqs";
-import { db } from "@monorepo-template/db";
+import { db, job_status } from "@monorepo-template/db";
 import { Resource } from "sst";
 import crypto from "crypto";
 
@@ -63,6 +63,8 @@ export const handler = async () => {
   try {
     const messages = await db.query.gallery.findMany();
     const results = await add_messages_to_queue(Resource.ScraperQueue.url, messages);
+
+    await db.insert(job_status).values({ number_of_messages: messages.length });
 
     return {
       statusCode: 200,

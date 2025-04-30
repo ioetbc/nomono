@@ -1,6 +1,7 @@
 import { Handler } from "aws-lambda";
-import { artists, db, exhibition, exhibition_artists, images } from "@monorepo-template/db";
+import { artists, db, exhibition, exhibition_artists, images, job_status, job_status_enum } from "@monorepo-template/db";
 import { EventScraper } from "../../services/src/event-scraper";
+import { desc, sql } from "drizzle-orm";
 
 export const handler: Handler = async (_event) => {
   try {
@@ -9,7 +10,7 @@ export const handler: Handler = async (_event) => {
     for (const record of records) {
       try {
         const body = JSON.parse(record.body);
-        console.log("Processing message:", body);
+        console.log("Processing message:", body.name);
 
         const scraper = new EventScraper();
         const exhibitions = await scraper.handler(body.url, body.id);
@@ -59,14 +60,25 @@ export const handler: Handler = async (_event) => {
                 artist_id: artist_response[0].id,
               });
             }
-
-            console.log(`Inserted exhibition for gallery ${body.id}: ${result.value?.exhibition_name}`);
           }
         }
       } catch (recordError) {
-        // Log error but continue processing other records
         console.error(`Error processing record: ${record.messageId}`, recordError);
-        // Don't throw here, allowing the batch to continue processing
+      } finally {
+        const current_job = await db.query.job_status.findFirst({ orderBy: desc(job_status.created_at) });
+
+        if (current_job) { 
+          const updated_total = current_job.total + 1;
+          const new_job_status = updated_total === current_job.number_of_messages ? job_status_enum.enumValues[1] : job_status_enum.enumValues[0]
+          
+          await db
+          .insert(job_status)
+          .values({ id: current_job.id, status: new_job_status, total: updated_total, success: current_job.success + 1 })
+          .onConflictDoUpdate({
+            target: job_status.id,
+            set: { success: sql`${job_status.success} + 1`, total: sql`${job_status.total} + 1`, status: new_job_status },
+          });
+        }
       }
     }
     

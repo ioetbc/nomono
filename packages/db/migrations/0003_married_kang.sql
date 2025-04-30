@@ -1,0 +1,1 @@
+ALTER TABLE "job_status" RENAME COLUMN "completed" TO "success";

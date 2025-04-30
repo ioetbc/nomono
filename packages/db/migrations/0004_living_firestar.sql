@@ -1,0 +1,1 @@
+ALTER TABLE "job_status" ADD COLUMN "number_of_messages" integer DEFAULT 0 NOT NULL;

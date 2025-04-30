@@ -112,6 +112,9 @@ importers:
       sst:
         specifier: '*'
         version: 3.13.19
+      zod:
+        specifier: ^3.24.3
+        version: 3.24.3
     devDependencies:
       '@swc-node/register':
         specifier: ^1.10.10

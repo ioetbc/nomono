@@ -1,7 +1,7 @@
 import { text, serial, pgTable, boolean, integer, primaryKey, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { z } from "zod";
 
-// Define the gallery table
 export const gallery = pgTable("gallery", {
 	id: serial("id").primaryKey(),
 	created_at: timestamp("created_at").notNull().defaultNow(),
@@ -99,14 +99,15 @@ export const images_relations = relations(images, ({ one }) => ({
 	}),
 }));
 
-export const job_status_enum = pgEnum("job_status_enum", ["pending", "running", "completed", "failed"]);
+export const job_status_enum = pgEnum("job_status_enum", ["pending", "completed", "failed"]);
 
 export const job_status = pgTable("job_status", {
 	id: serial("id").primaryKey(),
-	status: job_status_enum("job_status_enum").notNull(),
+	status: job_status_enum("job_status_enum").notNull().default("pending"),
+	number_of_messages: integer("number_of_messages").notNull().default(0),
 	total: integer("total").notNull().default(0),
 	failed: integer("failed").notNull().default(0),
-	completed: integer("completed").notNull().default(0),
+	success: integer("success").notNull().default(0),
 	created_at: timestamp("created_at").notNull().defaultNow(),
 	updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -122,6 +123,10 @@ export type ExhibitionArtist = typeof exhibition_artists.$inferSelect;
 export type NewExhibitionArtist = typeof exhibition_artists.$inferInsert;
 export type Image = typeof images.$inferSelect;
 export type NewImage = typeof images.$inferInsert;
+export type JobStatus = typeof job_status.$inferSelect;
+export type NewJobStatus = typeof job_status.$inferInsert;
+
+
 
 export default {
   gallery,
@@ -133,4 +138,6 @@ export default {
 	artists_relations,
 	exhibition_artists_relations,
 	images_relations,
+	job_status,
+	job_status_enum,
 };

@@ -113,7 +113,7 @@ export class EventScraper {
 			];
 
 			const urls = Array.from(unique).filter(
-				(href) => !blocked_domains.some((domain) => href.startsWith(domain)),
+				(href) => !blocked_domains.some((domain) => href?.startsWith(domain)),
 			);
 
 			return urls;
@@ -160,8 +160,6 @@ export class EventScraper {
 				) && !blocked_image_domains.some((domain) => url.startsWith(domain)),
 		);
 
-		console.log("filtered_image_urls", filtered_image_urls);
-
 		const unique_image_urls = new Set(filtered_image_urls);
 
 		return Array.from(unique_image_urls);
@@ -170,6 +168,7 @@ export class EventScraper {
 	async find_events(
 		text: string | undefined,
 		hrefs: string[],
+		url: string,
 	): Promise<Event[]> {
 		if (!text) {
 			console.log("no text passed to findEvents");
@@ -195,7 +194,15 @@ export class EventScraper {
 				return [];
 			}
 
-			return result.object.events;
+			const updated_events = result.object.events.map((event) => {
+				if (event.event_page_url && !event.event_page_url.startsWith("http")) {
+					event.event_page_url = new URL(event.event_page_url, new URL(url).origin).href;
+				}
+
+				return event;
+			})
+
+			return updated_events
 		} catch (error) {
 			console.error("error calling LLM to find events", error);
 			return [];
@@ -418,12 +425,16 @@ export class EventScraper {
 		}
 
 		const now = new Date();
+		console.log("now wtf", now);
+		console.log("endDate wtf", endDate);
 		const eventEndDate =
 			typeof endDate === "object" ? endDate : this.convert_date(endDate);
 
 		if (!eventEndDate) {
 			return false;
 		}
+
+		console.log("actual event end date!", eventEndDate);
 
 		return !isAfter(eventEndDate, now);
 	}
@@ -446,8 +457,6 @@ export class EventScraper {
 			this.extract_details(page_text),
 			this.extract_is_ticketed(page_text),
 		]);
-
-		console.log("featured_artists HERE", featured_artists);
 
 		return {
 			private_view,
@@ -479,7 +488,7 @@ export class EventScraper {
 
 			const all_events_page_text = this.pages.get(page_key)?.cheerio.page_text;
 			const hrefs = await this.get_hrefs(page_key);
-			const events = await this.find_events(all_events_page_text, hrefs);
+			const events = await this.find_events(all_events_page_text, hrefs, url);
 
 			console.log("events.length", events.length);
 
@@ -504,7 +513,7 @@ export class EventScraper {
 						return;
 					}
 
-					if (!event.event_page_url) {
+					if (!event.event_page_url || event.event_page_url === url) {
 						console.log(
 							"no event page url found for writing what we have",
 							event.name,
@@ -524,15 +533,14 @@ export class EventScraper {
 							info: "",
 							images: JSON.stringify([]),
 							featured_artists: JSON.stringify([]),
-							exhibition_page_url: event.event_page_url,
+							exhibition_page_url: event.event_page_url ?? url,
 							image_urls: JSON.stringify([]),
 						};
-						// await db.insert_exhibition(payload);
-						// await this.insert_seen_exhibition(event.name, gallery_id);
-						return;
+
+						return payload;
 					}
 
-					console.log("visiting event details page", event.event_page_url);
+					console.log("visiting:", event.event_page_url);
 					await this.visit_website(event.event_page_url);
 
 					const markdown = this.pages.get(event.event_page_url)?.cheerio
@@ -581,10 +589,12 @@ export class EventScraper {
 
 					// TODO: These two blocking statements might not need to exist if the prompt for getting the events is better. e.g. saying the page is unstructured??
 
+					console.log("payload?.end_date wtf", payload?.end_date);
+
 					if (this.has_event_ended(payload?.end_date ?? null)) {
 						await this.close_page(
 							event.event_page_url,
-							`Blocking: event has ended ${event.name} ${payload.end_date}`,
+							`Blocking: event has ended: ${event.name} ${event.end_date}`,
 						);
 						return;
 					}
@@ -592,7 +602,7 @@ export class EventScraper {
 					if (!details.exhibition_name) {
 						await this.close_page(
 							event.event_page_url,
-							`Blocking: no exhibition name found ${event.name}`,
+							`Blocking: no exhibition name: ${event.name}`,
 						);
 						return;
 					}
