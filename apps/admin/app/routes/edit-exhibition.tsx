@@ -124,9 +124,7 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div className="p-4 m-auto">
-			<h1 className="text-2xl font-semibold mb-4">
-				Edit Exhibition: {exhibition.name}
-			</h1>
+			<h1 className="text-4xl font-semibold mb-4">Edit Exhibition</h1>
 
 			<Form
 				key={exhibition.id}
