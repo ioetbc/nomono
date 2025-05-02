@@ -23,10 +23,8 @@ export default $config({
       },
     });
 
-    // DLQ for failed messages
     const deadLetterQueue = new sst.aws.Queue("DLQ");
     
-    // Main queue
     const queue = new sst.aws.Queue("ScraperQueue", {
         dlq: {
         retry: 5,
@@ -35,7 +33,6 @@ export default $config({
       visibilityTimeout: "5 minutes",
     });
     
-    // consumer of the queue
     queue.subscribe({
       name: "Consumer",
       handler: `${BASE_API_URL}/consumer.handler`,
@@ -51,25 +48,10 @@ export default $config({
       },
     });
 
-    // producer of the queue
-    new sst.aws.Function("Producer", {
-      vpc,
-      url: true,
-      link: [rds, queue],
-      handler: `${BASE_API_URL}/producer.handler`,
-    });
-
-    new sst.aws.Function("GetExhibitions", {
-      vpc,
-      url: true,
-      link: [rds],
-      handler: `${BASE_API_URL}/api.handler`,
-    });
-
     const admin_website = new sst.aws.React("Admin", {
       vpc,
       path: "apps/admin",
-      link: [rds],
+      link: [rds, queue],
     });
 
     return {

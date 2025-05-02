@@ -141,13 +141,13 @@ async function seed() {
 	// 	description: "For over 35 years, David Gill Gallery has been a pioneer in the world of collectible design and art. Founded in 1987 on the Fulham Road, Chelsea, the gallery first exhibited the works of historic masters such as Emile-Jacques Ruhlmann, Jean-Michel Frank and Line Vautrin soon adding contemporary artists, including Elizabeth Garouste and Mattia Bonetti, Grayson Perry and Donald Judd. From the outset, David Gill Gallery invigorated the London and global art scene with an original taste and perspective on art and design.\n\nThe gallery’s second location in Vauxhall in 1999 further encouraged these dynamic conversations, showing works in a custom-built space, including the now infamous ‘Yaa Hoo Town, Bunkhouse’ by Paul McCarthy. From 2012 the gallery took its place on King Street St. James’s, opening with Zaha Hadid’s now iconic Liquid Glacial series. The gallery continues to foster the talent of leading artists, architects and designers including Daniel Libeskind, Fredrikson Stallard and Chris Schanck.\n\nWorks from David Gill gallery can be found in esteemed private and public collections globally, including the Victoria & Albert Museum in London and the San Francisco Museum of Modern Art. David Gill has been honoured both with the Chevalier of the Ordre des Arts & des Lettres and as Officier of the Ordre des Arts & des Lettres. ",
 	// 	recommended: false
 	// },
-	// {
-	// 	id: 19,
-	// 	name: "Annka Kultys",
-	// 	url: "https://www.annkakultys.com/exhibitions/",
-	// 	description: "AKG is a hybrid commercial art project merging physical and digital experiences. Since its inception in 2015, the gallery has become a leading art space for artists who engage with technology, both in traditional and digital media.",
-	// 	recommended: false
-	// },
+	{
+		id: 19,
+		name: "Annka Kultys",
+		url: "https://www.annkakultys.com/exhibitions/",
+		description: "AKG is a hybrid commercial art project merging physical and digital experiences. Since its inception in 2015, the gallery has become a leading art space for artists who engage with technology, both in traditional and digital media.",
+		recommended: false
+	},
 	{
 		id: 20,
 		name: "Soup",

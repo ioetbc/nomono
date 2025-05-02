@@ -1,6 +1,5 @@
 import { text, serial, pgTable, boolean, integer, primaryKey, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { z } from "zod";
 
 export const gallery = pgTable("gallery", {
 	id: serial("id").primaryKey(),

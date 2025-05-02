@@ -13,11 +13,6 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
-    "GetExhibitions": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
-    }
     "OPENAI_API_KEY": {
       "type": "sst.sst.Secret"
       "value": string
@@ -29,11 +24,6 @@ declare module "sst" {
       "port": number
       "type": "sst.aws.Postgres"
       "username": string
-    }
-    "Producer": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
     }
     "ScraperQueue": {
       "type": "sst.aws.Queue"
