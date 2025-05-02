@@ -19,8 +19,14 @@ import { FeaturedArtists } from "~/components/featured-artists";
 import { ImageDropzone } from "~/components/image-dropzone";
 import { ImageEditor, labelStyle } from "~/components/image-editor";
 import { PrivateView } from "~/components/private-view";
-import { createImage, deleteImage, getExhibition } from "../data";
-import type { Route } from "./+types/exhibition";
+import {
+	createArtist,
+	createImage,
+	deleteImage,
+	getAllArtists,
+	getExhibition,
+} from "../data";
+import type { Route } from "./+types/edit-exhibition";
 
 export async function action({ params, request }: Route.ActionArgs) {
 	const formData = await request.formData();
@@ -62,6 +68,26 @@ export async function action({ params, request }: Route.ActionArgs) {
 		return { success: false };
 	}
 
+	if (intent === "createArtist") {
+		const name = formData.get("name");
+		const instagram_handle = formData.get("instagram_handle");
+
+		if (name && typeof name === "string") {
+			try {
+				const newArtist = await createArtist(
+					name,
+					instagram_handle && typeof instagram_handle === "string"
+						? instagram_handle
+						: undefined,
+				);
+				return { success: true, artist: newArtist };
+			} catch (error) {
+				return { success: false, error: "Failed to create artist" };
+			}
+		}
+		return { success: false, error: "Artist name is required" };
+	}
+
 	const exhibition_name = formData.get("exhibition_name");
 	const exhibition_url = formData.get("exhibition_url");
 	const start_date = formData.get("start_date");
@@ -69,7 +95,9 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const private_view_start_date = formData.get("private_view_start_date");
 	const private_view_end_date = formData.get("private_view_end_date");
 	const description = formData.get("description");
-	const featured_artists = formData.getAll("featured_artists");
+
+	// Get artist_ids instead of featured_artists strings
+	const artist_ids = formData.getAll("artist_ids[]");
 
 	if (exhibition_name && typeof exhibition_name === "string") {
 		await update_exhibition_name(exhibitionId, exhibition_name);
@@ -103,8 +131,22 @@ export async function action({ params, request }: Route.ActionArgs) {
 		await update_description(exhibitionId, description);
 	}
 
-	if (featured_artists?.every((artist) => typeof artist === "string")) {
-		await update_featured_artists(exhibitionId, featured_artists);
+	// Handle artist_ids array to get artist names for the existing update_featured_artists function
+	if (
+		artist_ids &&
+		artist_ids.length > 0 &&
+		artist_ids.every((id) => typeof id === "string")
+	) {
+		// Fetch all the selected artists to get their names
+		const allArtists = await getAllArtists();
+		const selectedArtistIds = artist_ids.map((id) => Number(id));
+		const selectedArtists = allArtists.filter((artist) =>
+			selectedArtistIds.includes(artist.id),
+		);
+		const artistNames = selectedArtists.map((artist) => artist.name);
+
+		// Update with the existing function that expects artist names
+		await update_featured_artists(exhibitionId, artistNames);
 	}
 
 	// return redirect(`/exhibitions/${exhibitionId}`);
@@ -115,12 +157,16 @@ export async function loader({ params }: Route.LoaderArgs) {
 	if (!exhibition) {
 		throw new Response("Not Found", { status: 404 });
 	}
-	return { exhibition };
+
+	// Load all artists for the select input
+	const allArtists = await getAllArtists();
+
+	return { exhibition, allArtists };
 }
 
 export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 	const navigate = useNavigate();
-	const { exhibition } = loaderData;
+	const { exhibition, allArtists } = loaderData;
 
 	return (
 		<div className="p-4 m-auto">
@@ -150,6 +196,11 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 				<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
 					<ExhibitionName name={exhibition.name} />
 
+					<FeaturedArtists
+						initialArtists={exhibition.featured_artists}
+						allArtists={allArtists}
+					/>
+
 					<ExhibitionUrl url={exhibition.url} />
 
 					<ExhibitionDates
@@ -163,8 +214,6 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 					/>
 
 					<Description description={exhibition.description} />
-
-					<FeaturedArtists initialArtists={exhibition.featured_artists} />
 
 					<div className="flex gap-4 mt-4 justify-end">
 						<Button

@@ -257,6 +257,48 @@ export async function getImagesForExhibition(
 	}));
 }
 
+export async function getAllArtists(): Promise<ArtistRecord[]> {
+	const artistList = await db.select().from(artists);
+
+	return artistList
+		.map((artist) => ({
+			id: artist.id,
+			name: artist.name,
+			instagram_handle: artist.instagram_handle || undefined,
+			created_at: new Date(artist.created_at).toISOString(),
+		}))
+		.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function createArtist(
+	name: string,
+	instagram_handle?: string,
+): Promise<ArtistRecord> {
+	const trimmedName = name.trim();
+	if (!trimmedName) {
+		throw new Error("Artist name cannot be empty");
+	}
+
+	const capitalizedName =
+		trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
+
+	const [newArtist] = await db
+		.insert(artists)
+		.values({
+			name: capitalizedName,
+			instagram_handle: instagram_handle || null,
+			created_at: new Date(),
+		})
+		.returning();
+
+	return {
+		id: newArtist.id,
+		name: newArtist.name,
+		instagram_handle: newArtist.instagram_handle || undefined,
+		created_at: new Date(newArtist.created_at).toISOString(),
+	};
+}
+
 export async function createImage(data: ImageMutation): Promise<ImageRecord> {
 	const newImage = await db
 		.insert(images)

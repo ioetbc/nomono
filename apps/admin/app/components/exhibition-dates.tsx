@@ -1,26 +1,15 @@
+import type { ExhibitionRecord } from "~/data";
+import { formatDateForInput } from "~/utils/date-functions";
 import { inputStyle, labelStyle, labelTextStyle } from "./image-editor";
 
 interface ExhibitionDatesProps {
-	startDate?: string;
-	endDate?: string;
+	startDate?: ExhibitionRecord["start_date"];
+	endDate?: ExhibitionRecord["end_date"];
 }
 
 export function ExhibitionDates({ startDate, endDate }: ExhibitionDatesProps) {
-	// Helper function to format date for input fields
-	const formatDateForInput = (dateString?: string) => {
-		if (!dateString) return "";
-		return new Date(dateString).toISOString().split("T")[0];
-	};
-
 	return (
-		<div
-			style={{
-				padding: "1.5rem",
-				borderRadius: "8px",
-				border: "1px solid #e2e8f0",
-				backgroundColor: "white",
-			}}
-		>
+		<div className="p-4 rounded-lg border border-gray-200 bg-white">
 			<h2 className="text-lg font-semibold mb-4 text-gray-800">
 				Exhibition Dates
 			</h2>

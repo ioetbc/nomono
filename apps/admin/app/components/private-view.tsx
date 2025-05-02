@@ -1,31 +1,17 @@
-import { format } from "date-fns";
+import type { ExhibitionRecord } from "~/data";
+import {
+	combineDateTime,
+	formatDateForInput,
+	formatTimeForInput,
+} from "~/utils/date-functions";
 import { inputStyle, labelStyle, labelTextStyle } from "./image-editor";
 
 interface PrivateViewProps {
-	startDate?: string;
-	endDate?: string;
+	startDate?: ExhibitionRecord["private_view_start_date"];
+	endDate?: ExhibitionRecord["private_view_end_date"];
 }
 
 export function PrivateView({ startDate, endDate }: PrivateViewProps) {
-	// Helper functions to format date and time for input fields
-	const formatDateForInput = (dateString?: string) => {
-		if (!dateString) return "";
-		return new Date(dateString).toISOString().split("T")[0];
-	};
-
-	const formatTimeForInput = (dateString?: string) => {
-		if (!dateString) return "";
-		const date = new Date(dateString);
-		// Format time as HH:MM
-		return format(date, "HH:mm");
-	};
-
-	const combineDateTime = (dateValue: string, timeValue: string) => {
-		if (!dateValue) return "";
-		const time = timeValue || "00:00";
-		return `${dateValue}T${time}`;
-	};
-
 	return (
 		<div className="p-4 rounded-lg border border-gray-200 bg-white">
 			<h2 className="text-lg font-semibold mb-4 text-gray-800">Private view</h2>

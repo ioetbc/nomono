@@ -1,10 +1,15 @@
+import type { ExhibitionRecord } from "~/data";
 import { inputStyle, labelStyle } from "./image-editor";
 
 interface Props {
-	url: string;
+	url?: ExhibitionRecord["url"];
 }
 
 export function ExhibitionUrl({ url }: Props) {
+	if (!url) {
+		return null;
+	}
+
 	return (
 		<div className="p-4 rounded-lg border border-gray-200 bg-white">
 			<label style={labelStyle}>
