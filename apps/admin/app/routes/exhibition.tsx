@@ -1,4 +1,5 @@
 import { Form, useFetcher } from "react-router";
+import { Button } from "~/components/button";
 import {
 	type ExhibitionRecord,
 	getExhibition,
@@ -106,20 +107,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							Open website
 						</a>
 						<Form action="edit">
-							<button
-								type="submit"
-								style={{
-									background: "#3182ce",
-									color: "white",
-									border: "none",
-									padding: "0.5rem 1rem",
-									borderRadius: "4px",
-									cursor: "pointer",
-									fontWeight: 500,
-								}}
-							>
-								Edit
-							</button>
+							<Button button_type="submit" label="Edit" />
 						</Form>
 						<Form
 							action="destroy"
@@ -132,12 +120,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 								}
 							}}
 						>
-							<button
-								type="submit"
-								className="bg-red-500 text-white px-4 py-2 rounded-md font-medium"
-							>
-								Delete
-							</button>
+							<Button button_type="submit" label="Delete" />
 						</Form>
 					</div>
 				</div>
