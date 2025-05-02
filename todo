@@ -5,13 +5,13 @@
 [x] ability to edit artists
 [x] run scraper from admin panel
 [x] move open website button next to edit and delete buttons
-[] add tailwind
-[] add biome
+[x] add tailwind
+[x] add biome
 [] make migrations easier move drizzle config to db package
 [] move evals test over
 [] add gallery address & opening times relations
 [] some events are being duplicated BANZ and compositions - figure out why
-[] going back to images - huxley parlour url is multiple urls - look at fittings exhibitition
+[] going back to images - huxley parlour url is multiple urls - look at fittings exhibition
 [x] when you seed reset the sequence ids back to 0
 [] add back in seen events?
 [] have a look at the dlq there are two messages on it
