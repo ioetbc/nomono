@@ -14,7 +14,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const formData = await request.formData();
 	const intent = formData.get("intent");
 
-	console.log('params', params);
+	console.log("params", params);
 
 	const exhibitionId = Number(params.exhibition_id);
 	if (Number.isNaN(exhibitionId)) {
@@ -54,11 +54,16 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const entries = Array.from(formData.entries());
 	const updates: Record<string, any> = {};
 	const featuredArtists: string[] = [];
-	
+
 	// Extract all form values
 	for (const [key, value] of entries) {
 		// Check if this is a featured artist field
-		if (key.startsWith('featured_artists[') && value && typeof value === 'string' && value.trim() !== '') {
+		if (
+			key.startsWith("featured_artists[") &&
+			value &&
+			typeof value === "string" &&
+			value.trim() !== ""
+		) {
 			featuredArtists.push(value.trim());
 		} else {
 			updates[key] = value;
@@ -70,7 +75,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 		updates.featured_artists = featuredArtists;
 	}
 
-	console.log('updates', updates);
+	console.log("updates", updates);
 
 	if (
 		updates.private_view_start_date &&
@@ -336,14 +341,14 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 	// Initialize artist inputs based on exhibition data
 	useEffect(() => {
 		if (exhibition.featured_artists && exhibition.featured_artists.length > 0) {
-			setArtistInputs(exhibition.featured_artists.map(a => a.artist.name));
+			setArtistInputs(exhibition.featured_artists.map((a) => a.artist.name));
 		} else {
-			setArtistInputs(['']);
+			setArtistInputs([""]);
 		}
 	}, [exhibition]);
 
 	const addArtistInput = () => {
-		setArtistInputs([...artistInputs, '']);
+		setArtistInputs([...artistInputs, ""]);
 	};
 
 	const removeArtistInput = (index: number) => {
@@ -670,9 +675,11 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 						>
 							Featured Artists
 						</h2>
-						<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+						<div
+							style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+						>
 							{artistInputs.map((artist, index) => (
-								<div key={index} style={{ display: "flex", gap: "0.5rem" }}>
+								<div key={artist} style={{ display: "flex", gap: "0.5rem" }}>
 									<input
 										type="text"
 										name={`featured_artists[${index}]`}

@@ -220,7 +220,8 @@ export const extract_private_view_prompt = ({
       3. Use ISO 8601 for all returned dates and times.
       4. Always use the exact time of the event as stated in the "Markdown file". For example if the event starts at 6:15pm, record 2025-04-10T18:15:00.000Z and not 2025-04-10T18:00:00.000Z
       4. No Fabrication: Only use date/time details found in the "Markdown file".
-      5. Ignore Example Values: Any dates/times shown in these instructions are for demonstration only. Do not reference them directly in your answer.
+      5. If a year is not provided, use the current year (2025).
+      6. Ignore Example Values: Any dates/times shown in these instructions are for demonstration only. Do not reference them directly in your answer.
     </important>
 
 `,

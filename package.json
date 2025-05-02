@@ -5,6 +5,7 @@
     "db": "sst shell drizzle-kit"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@tsconfig/node22": "^22",
     "@types/pg": "^8.11.14",
     "typescript": "^5"
