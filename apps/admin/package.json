@@ -10,6 +10,7 @@
 		"typegen": "react-router typegen"
 	},
 	"dependencies": {
+		"@aws-sdk/client-sqs": "^3.798.0",
 		"@monorepo-template/db": "workspace:*",
 		"@react-router/node": "^7.5.1",
 		"@react-router/serve": "^7.5.1",

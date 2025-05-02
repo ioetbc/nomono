@@ -16,4 +16,5 @@ export default [
 		),
 	]),
 	route("about", "routes/about.tsx"),
+	route("scrape", "routes/scrape.tsx"),
 ] satisfies RouteConfig;

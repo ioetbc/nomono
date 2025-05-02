@@ -14,6 +14,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 	}
 
 	const exhibition = await getExhibition(exhibition_id);
+	
 	if (!exhibition) {
 		throw new Response("Not Found", { status: 404 });
 	}
