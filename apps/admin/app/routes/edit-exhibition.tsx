@@ -1,5 +1,15 @@
 import { useNavigate } from "react-router";
-import { Form, redirect } from "react-router";
+import { Form } from "react-router";
+import {
+	update_description,
+	update_end_date,
+	update_exhibition_name,
+	update_exhibition_url,
+	update_featured_artists,
+	update_private_view_end_date,
+	update_private_view_start_date,
+	update_start_date,
+} from "~/actions/update-exhibition";
 import { Button } from "~/components/button";
 import { Description } from "~/components/description";
 import { ExhibitionDates } from "~/components/exhibition-dates";
@@ -7,18 +17,9 @@ import { ExhibitionName } from "~/components/exhibition-name";
 import { ExhibitionUrl } from "~/components/exhibition-url";
 import { FeaturedArtists } from "~/components/featured-artists";
 import { ImageDropzone } from "~/components/image-dropzone";
-import {
-	ImageEditor,
-	labelStyle,
-	labelTextStyle,
-} from "~/components/image-editor";
+import { ImageEditor, labelStyle } from "~/components/image-editor";
 import { PrivateView } from "~/components/private-view";
-import {
-	createImage,
-	deleteImage,
-	getExhibition,
-	updateExhibition,
-} from "../data";
+import { createImage, deleteImage, getExhibition } from "../data";
 import type { Route } from "./+types/exhibition";
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -61,53 +62,52 @@ export async function action({ params, request }: Route.ActionArgs) {
 		return { success: false };
 	}
 
-	// Process the form entries
-	const entries = Array.from(formData.entries());
-	const updates: Record<string, any> = {};
-	const featuredArtists: string[] = [];
+	const exhibition_name = formData.get("exhibition_name");
+	const exhibition_url = formData.get("exhibition_url");
+	const start_date = formData.get("start_date");
+	const end_date = formData.get("end_date");
+	const private_view_start_date = formData.get("private_view_start_date");
+	const private_view_end_date = formData.get("private_view_end_date");
+	const description = formData.get("description");
+	const featured_artists = formData.getAll("featured_artists");
 
-	// Extract all form values
-	for (const [key, value] of entries) {
-		// Check if this is a featured artist field
-		if (
-			key.startsWith("featured_artists[") &&
-			value &&
-			typeof value === "string" &&
-			value.trim() !== ""
-		) {
-			featuredArtists.push(value.trim());
-		} else {
-			updates[key] = value;
-		}
+	if (exhibition_name && typeof exhibition_name === "string") {
+		await update_exhibition_name(exhibitionId, exhibition_name);
 	}
 
-	// Add featured artists to updates
-	if (featuredArtists.length > 0) {
-		updates.featured_artists = featuredArtists;
+	if (exhibition_url && typeof exhibition_url === "string") {
+		await update_exhibition_url(exhibitionId, exhibition_url);
 	}
 
-	console.log("updates", updates);
-
-	if (
-		updates.private_view_start_date &&
-		typeof updates.private_view_start_date === "string"
-	) {
-		updates.private_view_start_date = new Date(
-			updates.private_view_start_date,
-		).toISOString();
+	if (start_date && typeof start_date === "string") {
+		const date = new Date(start_date);
+		await update_start_date(exhibitionId, date);
 	}
 
-	if (
-		updates.private_view_end_date &&
-		typeof updates.private_view_end_date === "string"
-	) {
-		updates.private_view_end_date = new Date(
-			updates.private_view_end_date,
-		).toISOString();
+	if (end_date && typeof end_date === "string") {
+		const date = new Date(end_date);
+		await update_end_date(exhibitionId, date);
 	}
 
-	await updateExhibition(exhibitionId, updates);
-	return redirect(`/exhibitions/${exhibitionId}`);
+	if (private_view_start_date && typeof private_view_start_date === "string") {
+		const date = new Date(private_view_start_date);
+		await update_private_view_start_date(exhibitionId, date);
+	}
+
+	if (private_view_end_date && typeof private_view_end_date === "string") {
+		const date = new Date(private_view_end_date);
+		await update_private_view_end_date(exhibitionId, date);
+	}
+
+	if (description && typeof description === "string") {
+		await update_description(exhibitionId, description);
+	}
+
+	if (featured_artists?.every((artist) => typeof artist === "string")) {
+		await update_featured_artists(exhibitionId, featured_artists);
+	}
+
+	// return redirect(`/exhibitions/${exhibitionId}`);
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -123,10 +123,8 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 	const { exhibition } = loaderData;
 
 	return (
-		<div style={{ margin: "0 auto", padding: "2rem 1rem" }}>
-			<h1
-				style={{ fontSize: "1.75rem", marginBottom: "1.5rem", fontWeight: 600 }}
-			>
+		<div className="p-4 m-auto">
+			<h1 className="text-2xl font-semibold mb-4">
 				Edit Exhibition: {exhibition.name}
 			</h1>
 
@@ -134,28 +132,21 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 				key={exhibition.id}
 				id="exhibition-form"
 				method="post"
-				style={{
-					display: "grid",
-					gridTemplateColumns: "1fr 4fr",
-					gap: "1.5rem",
-					backgroundColor: "#f7fafc",
-					padding: "2rem",
-					borderRadius: "8px",
-					border: "1px solid #e2e8f0",
-				}}
+				className="grid grid-cols-[2fr_4fr] gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200"
 			>
 				<div>
 					<div style={labelStyle}>
-						<span style={labelTextStyle}>Exhibition images</span>
-						<div
-							style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-						>
+						{exhibition.images.length > 0 && (
+							<h2 className="text-lg font-semibold mb-4 text-gray-800">
+								Exhibition images
+							</h2>
+						)}
+						<div className="grid grid-cols-[1fr_1fr] gap-4">
 							{exhibition.images.map((image) => (
 								<ImageEditor key={image.id} image={image} />
 							))}
-
-							<ImageDropzone />
 						</div>
+						<ImageDropzone />
 					</div>
 				</div>
 				<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -177,14 +168,7 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 
 					<FeaturedArtists initialArtists={exhibition.featured_artists} />
 
-					<div
-						style={{
-							display: "flex",
-							gap: "1rem",
-							marginTop: "1rem",
-							justifyContent: "flex-end",
-						}}
-					>
+					<div className="flex gap-4 mt-4 justify-end">
 						<Button
 							button_type="button"
 							label="Cancel"

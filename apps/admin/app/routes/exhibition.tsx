@@ -1,10 +1,7 @@
 import { Form, useFetcher } from "react-router";
+import { update_recommended } from "~/actions/update-exhibition";
 import { Button } from "~/components/button";
-import {
-	type ExhibitionRecord,
-	getExhibition,
-	updateExhibition,
-} from "../data";
+import { type ExhibitionRecord, getExhibition } from "../data";
 import type { Route } from "./+types/exhibition";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -126,7 +123,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-[1fr_4fr] gap-4">
+			<div className="grid grid-cols-[2fr_4fr] gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
 				<div>
 					{exhibition.images.map((image) => (
 						<img
@@ -231,7 +228,8 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							}}
 						>
 							<span>
-								{exhibition.featured_artists.length > 0
+								{exhibition.featured_artists &&
+								exhibition.featured_artists.length > 0
 									? lf.format(
 											exhibition.featured_artists.map((a) => a.artist.name),
 										)
@@ -278,15 +276,16 @@ export async function action({ params, request }: Route.ActionArgs) {
 	}
 
 	const formData = await request.formData();
-	return updateExhibition(exhibition_id, {
-		recommended: formData.get("recommended") === "true",
-	});
+
+	const recommended = formData.get("recommended") === "true";
+
+	return update_recommended(exhibition_id, recommended);
 }
 
 function Favorite({
 	exhibition,
 }: {
-	exhibition: Pick<ExhibitionRecord, "recommended">;
+	exhibition: ExhibitionRecord;
 }) {
 	const fetcher = useFetcher();
 	const favorite = fetcher.formData

@@ -21,14 +21,7 @@ export function ExhibitionDates({ startDate, endDate }: ExhibitionDatesProps) {
 				backgroundColor: "white",
 			}}
 		>
-			<h2
-				style={{
-					fontSize: "1.25rem",
-					marginBottom: "1rem",
-					fontWeight: 600,
-					color: "#2d3748",
-				}}
-			>
+			<h2 className="text-lg font-semibold mb-4 text-gray-800">
 				Exhibition Dates
 			</h2>
 			<div style={{ display: "flex", gap: "1rem" }}>

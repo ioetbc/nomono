@@ -1,5 +1,4 @@
 import { inputStyle } from "./image-editor";
-import { labelTextStyle } from "./image-editor";
 
 import { labelStyle } from "./image-editor";
 
@@ -7,9 +6,11 @@ export const Description = ({ description }: { description?: string }) => {
 	if (!description) return null;
 
 	return (
-		<div className="form-group">
+		<div className="p-4 rounded-lg border border-gray-200 bg-white">
 			<label style={labelStyle}>
-				<span style={labelTextStyle}>Description</span>
+				<h2 className="text-lg font-semibold mb-4 text-gray-800">
+					Description
+				</h2>
 				<textarea
 					defaultValue={description}
 					name="description"

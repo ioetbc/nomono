@@ -19,17 +19,18 @@ type ExhibitionMutation = {
 	url?: string;
 	gallery_id?: number;
 	recommended?: boolean;
-	start_date?: string;
-	end_date?: string;
-	private_view_start_date?: string;
-	private_view_end_date?: string;
+	start_date?: Date;
+	end_date?: Date;
+	private_view_start_date?: Date;
+	private_view_end_date?: Date;
 	featured_artists?: string[];
 };
 
 export type ExhibitionRecord = ExhibitionMutation & {
 	id: number;
-	created_at: string;
-	images?: ImageRecord[];
+	created_at: Date;
+	updated_at: Date;
+	images?: string[];
 	featured_artists?: ArtistRecord[];
 };
 
@@ -57,19 +58,17 @@ export async function getExhibitions(query?: string | null) {
 				name: exhibit.name,
 				description: exhibit.description || undefined,
 				start_date: exhibit.start_date
-					? new Date(exhibit.start_date).toISOString()
+					? new Date(exhibit.start_date)
 					: undefined,
-				end_date: exhibit.end_date
-					? new Date(exhibit.end_date).toISOString()
-					: undefined,
+				end_date: exhibit.end_date ? new Date(exhibit.end_date) : undefined,
 				private_view_start_date: exhibit.private_view_start_date
-					? new Date(exhibit.private_view_start_date).toISOString()
+					? new Date(exhibit.private_view_start_date)
 					: undefined,
 				private_view_end_date: exhibit.private_view_end_date
-					? new Date(exhibit.private_view_end_date).toISOString()
+					? new Date(exhibit.private_view_end_date)
 					: undefined,
-				created_at: new Date(exhibit.created_at).toISOString(),
-				updated_at: new Date(exhibit.updated_at).toISOString(),
+				created_at: new Date(exhibit.created_at),
+				updated_at: new Date(exhibit.updated_at),
 				gallery_id: exhibit.gallery_id || undefined,
 				url: exhibit.url || undefined,
 				recommended: exhibit.recommended || false,
@@ -100,20 +99,16 @@ export async function getDrizzleExhibition(id: number) {
 		id: result.id,
 		name: result.name,
 		description: result.description || undefined,
-		start_date: result.start_date
-			? new Date(result.start_date).toISOString()
-			: undefined,
-		end_date: result.end_date
-			? new Date(result.end_date).toISOString()
-			: undefined,
+		start_date: result.start_date ? new Date(result.start_date) : undefined,
+		end_date: result.end_date ? new Date(result.end_date) : undefined,
 		private_view_start_date: result.private_view_start_date
-			? new Date(result.private_view_start_date).toISOString()
+			? new Date(result.private_view_start_date)
 			: undefined,
 		private_view_end_date: result.private_view_end_date
-			? new Date(result.private_view_end_date).toISOString()
+			? new Date(result.private_view_end_date)
 			: undefined,
-		created_at: new Date(result.created_at).toISOString(),
-		updated_at: new Date(result.updated_at).toISOString(),
+		created_at: new Date(result.created_at),
+		updated_at: new Date(result.updated_at),
 		gallery_id: result.gallery_id || undefined,
 		url: result.url || undefined,
 		recommended: result.recommended || false,
@@ -144,93 +139,76 @@ export async function createDrizzleEmptyExhibition() {
 
 export async function updateDrizzleExhibition(
 	id: number,
-	updates: ExhibitionMutation,
+	updates: ExhibitionRecord,
 ) {
-	const updateData: Record<string, string | boolean | number | Date | null> =
-		{};
+	const currentExhibition = await db
+		.select()
+		.from(exhibition)
+		.where(eq(exhibition.id, id))
+		.limit(1);
 
-	if (updates.name !== undefined) updateData.name = updates.name;
-	if (updates.description !== undefined)
-		updateData.description = updates.description;
-	if (updates.url !== undefined) updateData.url = updates.url;
-	if (updates.gallery_id !== undefined)
-		updateData.gallery_id = updates.gallery_id;
-	if (updates.recommended !== undefined)
-		updateData.recommended = updates.recommended;
-	if (updates.start_date !== undefined)
-		updateData.start_date = updates.start_date
-			? new Date(updates.start_date)
-			: null;
-	if (updates.end_date !== undefined)
-		updateData.end_date = updates.end_date ? new Date(updates.end_date) : null;
-	if (updates.private_view_start_date !== undefined)
-		updateData.private_view_start_date = updates.private_view_start_date
-			? new Date(updates.private_view_start_date)
-			: null;
-	if (updates.private_view_end_date !== undefined)
-		updateData.private_view_end_date = updates.private_view_end_date
-			? new Date(updates.private_view_end_date)
-			: null;
+	if (!currentExhibition.length) {
+		throw new Error(`Exhibition with id ${id} not found`);
+	}
 
-	await db.update(exhibition).set(updateData).where(eq(exhibition.id, id));
+	const current = currentExhibition[0];
 
-	console.log("updates?.featured_artists", updates?.featured_artists);
+	const updated_exhibition = {
+		...current,
+		...updates,
+	};
 
-	// If featured artists array is provided, update relationships
-	if (updates?.featured_artists && updates.featured_artists.length > 0) {
-		// First, get all existing exhibition artists relationships
-		const existingRelationships = await db
-			.select()
-			.from(exhibition_artists)
+	await db
+		.update(exhibition)
+		.set(updated_exhibition)
+		.where(eq(exhibition.id, id));
+
+	// 4. Handle featured artists if provided
+	if (updates.featured_artists !== undefined) {
+		// Delete all existing relationships
+		await db
+			.delete(exhibition_artists)
 			.where(eq(exhibition_artists.exhibition_id, id));
 
-		// Delete all existing relationships for this exhibition
-		if (existingRelationships.length > 0) {
-			await db
-				.delete(exhibition_artists)
-				.where(eq(exhibition_artists.exhibition_id, id));
-		}
+		// Only process if there are artists to add
+		if (updates.featured_artists && updates.featured_artists.length > 0) {
+			for (const artistName of updates.featured_artists) {
+				// Skip empty artist names
+				if (!artistName.trim()) continue;
 
-		// Process each artist name
-		for (const artistName of updates.featured_artists) {
-			// Skip empty artist names
-			if (!artistName.trim()) continue;
+				// Find or create artist
+				const artistRecord = await db
+					.select()
+					.from(artists)
+					.where(eq(artists.name, artistName))
+					.limit(1);
 
-			// Find or create artist
-			const artistRecord = await db
-				.select()
-				.from(artists)
-				.where(eq(artists.name, artistName))
-				.limit(1);
+				// Use the found artist ID or create a new artist
+				const artistId = artistRecord.length
+					? artistRecord[0].id
+					: (
+							await db
+								.insert(artists)
+								.values({
+									name: artistName,
+									created_at: new Date(),
+								})
+								.returning()
+						)[0].id;
 
-			let artistId: number;
-
-			if (artistRecord.length === 0) {
-				// Create new artist
-				const newArtist = await db
-					.insert(artists)
+				// Create relationship
+				await db
+					.insert(exhibition_artists)
 					.values({
-						name: artistName,
-						created_at: new Date(),
+						exhibition_id: id,
+						artist_id: artistId,
 					})
-					.returning();
-
-				artistId = newArtist[0].id;
-			} else {
-				artistId = artistRecord[0].id;
+					.onConflictDoNothing();
 			}
-
-			// Create relationship
-			await db
-				.insert(exhibition_artists)
-				.values({
-					exhibition_id: id,
-					artist_id: artistId,
-				})
-				.onConflictDoNothing();
 		}
 	}
 
+	// 5. Return the updated exhibition with all its relations
 	return getDrizzleExhibition(id);
 }
 

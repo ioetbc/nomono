@@ -27,24 +27,8 @@ export function PrivateView({ startDate, endDate }: PrivateViewProps) {
 	};
 
 	return (
-		<div
-			style={{
-				padding: "1.5rem",
-				borderRadius: "8px",
-				border: "1px solid #e2e8f0",
-				backgroundColor: "white",
-			}}
-		>
-			<h2
-				style={{
-					fontSize: "1.25rem",
-					marginBottom: "1rem",
-					fontWeight: 600,
-					color: "#2d3748",
-				}}
-			>
-				Private View
-			</h2>
+		<div className="p-4 rounded-lg border border-gray-200 bg-white">
+			<h2 className="text-lg font-semibold mb-4 text-gray-800">Private view</h2>
 			<div style={{ display: "flex", gap: "1rem" }}>
 				<div style={{ flex: 1 }}>
 					<label style={labelStyle}>

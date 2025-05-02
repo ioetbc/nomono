@@ -64,16 +64,9 @@ export const ImageDropzone = () => {
 
 	return (
 		<div>
-			<h3
-				style={{
-					fontSize: "1rem",
-					fontWeight: 500,
-					marginTop: 0,
-					marginBottom: "1rem",
-				}}
-			>
-				Add New Image
-			</h3>
+			<h2 className="text-lg font-semibold mb-4 text-gray-800">
+				Add new image
+			</h2>
 
 			<div
 				{...getRootProps()}

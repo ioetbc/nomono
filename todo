@@ -7,6 +7,7 @@
 [x] move open website button next to edit and delete buttons
 [x] add tailwind
 [x] add biome
+[x] edit page - break into components
 [] make migrations easier move drizzle config to db package
 [] move evals test over
 [] add gallery address & opening times relations

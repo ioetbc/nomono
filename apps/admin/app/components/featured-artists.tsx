@@ -8,7 +8,6 @@ interface FeaturedArtistsProps {
 export function FeaturedArtists({ initialArtists }: FeaturedArtistsProps) {
 	const [artistInputs, setArtistInputs] = useState<string[]>([]);
 
-	// Initialize artist inputs based on exhibition data
 	useEffect(() => {
 		if (initialArtists && initialArtists.length > 0) {
 			setArtistInputs(initialArtists.map((a) => a.artist.name));
@@ -36,23 +35,8 @@ export function FeaturedArtists({ initialArtists }: FeaturedArtistsProps) {
 	};
 
 	return (
-		<div
-			style={{
-				padding: "1.5rem",
-				borderRadius: "8px",
-				border: "1px solid #e2e8f0",
-				backgroundColor: "white",
-				marginBottom: "1rem",
-			}}
-		>
-			<h2
-				style={{
-					fontSize: "1.25rem",
-					marginBottom: "1rem",
-					fontWeight: 600,
-					color: "#2d3748",
-				}}
-			>
+		<div className="p-4 rounded-lg border border-gray-200 bg-white">
+			<h2 className="text-lg font-semibold mb-4 text-gray-800">
 				Featured Artists
 			</h2>
 			<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -60,7 +44,7 @@ export function FeaturedArtists({ initialArtists }: FeaturedArtistsProps) {
 					<div key={artist} style={{ display: "flex", gap: "0.5rem" }}>
 						<input
 							type="text"
-							name={`featured_artists[${index}]`}
+							name="featured_artists"
 							value={artist}
 							onChange={(e) => handleArtistChange(index, e.target.value)}
 							placeholder="Artist name"
