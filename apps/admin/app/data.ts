@@ -3,8 +3,10 @@ import sortBy from "sort-by";
 
 import {
 	type Exhibition,
+	artists,
 	create_db,
 	exhibition,
+	exhibition_artists,
 	images,
 } from "@monorepo-template/db";
 import { eq, ilike } from "drizzle-orm";
@@ -21,6 +23,7 @@ type ExhibitionMutation = {
 	end_date?: string;
 	private_view_start_date?: string
 	private_view_end_date?: string;
+	featured_artists?: string[];
 };
 
 export type ExhibitionRecord = ExhibitionMutation & {
@@ -170,6 +173,63 @@ export async function updateDrizzleExhibition(
 			: null;
 
 	await db.update(exhibition).set(updateData).where(eq(exhibition.id, id));
+
+	console.log('updates?.featured_artists', updates?.featured_artists);
+
+	// If featured artists array is provided, update relationships
+	if (updates?.featured_artists && updates.featured_artists.length > 0) {
+		// First, get all existing exhibition artists relationships
+		const existingRelationships = await db
+			.select()
+			.from(exhibition_artists)
+			.where(eq(exhibition_artists.exhibition_id, id));
+
+		// Delete all existing relationships for this exhibition
+		if (existingRelationships.length > 0) {
+			await db
+				.delete(exhibition_artists)
+				.where(eq(exhibition_artists.exhibition_id, id));
+		}
+
+		// Process each artist name
+		for (const artistName of updates.featured_artists) {
+			// Skip empty artist names
+			if (!artistName.trim()) continue;
+
+			// Find or create artist
+			let artistRecord = await db
+				.select()
+				.from(artists)
+				.where(eq(artists.name, artistName))
+				.limit(1);
+
+			let artistId;
+
+			if (artistRecord.length === 0) {
+				// Create new artist
+				const newArtist = await db
+					.insert(artists)
+					.values({
+						name: artistName,
+						created_at: new Date(),
+					})
+					.returning();
+				
+				artistId = newArtist[0].id;
+			} else {
+				artistId = artistRecord[0].id;
+			}
+
+			// Create relationship
+			await db
+				.insert(exhibition_artists)
+				.values({
+					exhibition_id: id,
+					artist_id: artistId,
+				})
+				.onConflictDoNothing();
+		}
+	}
 
 	return getDrizzleExhibition(id);
 }

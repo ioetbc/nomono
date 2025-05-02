@@ -138,6 +138,25 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 								Delete
 							</button>
 						</Form>
+						
+							<a
+								type="button"
+								href={exhibition.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								style={{
+									background: "#ffe600",
+									color: "black",
+									border: "none",
+									padding: "0.5rem 1rem",
+									borderRadius: "4px",
+									cursor: "pointer",
+									fontWeight: 500,
+								}}
+							>
+								Open website
+							</a>
+						
 					</div>
 				</div>
 			</div>

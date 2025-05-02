@@ -1,10 +1,12 @@
 [] on submit of exhibition delete image and save version of image in s3 save url in db
-[] add caption to image
 [] create placeholder image and add to s3 + save in db
+[] add caption to image
 [] view to see live events
-[] ability to edit artists
+[x] ability to edit artists
 [x] run scraper from admin panel
-[] move open website button next to edit and delete buttons
+[x] move open website button next to edit and delete buttons
+[] add tailwind
+[] add biome
 [] make migrations easier move drizzle config to db package
 [] move evals test over
 [] add gallery address & opening times relations

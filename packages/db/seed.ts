@@ -8,10 +8,9 @@ import {
 	images,
 	job_status,
 } from "@monorepo-template/db";
-import { and, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 async function seed() {
-	console.log("Seeding database with contacts...");
 	const db = create_db();
 
 	try {
