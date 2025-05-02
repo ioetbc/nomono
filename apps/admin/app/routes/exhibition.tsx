@@ -14,7 +14,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 	}
 
 	const exhibition = await getExhibition(exhibition_id);
-	
+
 	if (!exhibition) {
 		throw new Response("Not Found", { status: 404 });
 	}
@@ -96,6 +96,15 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							gap: "0.75rem",
 						}}
 					>
+						<a
+							type="button"
+							href={exhibition.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="bg-yellow-500 text-black px-4 py-2 rounded-md font-medium"
+						>
+							Open website
+						</a>
 						<Form action="edit">
 							<button
 								type="submit"
@@ -125,77 +134,28 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 						>
 							<button
 								type="submit"
-								style={{
-									background: "#e53e3e",
-									color: "white",
-									border: "none",
-									padding: "0.5rem 1rem",
-									borderRadius: "4px",
-									cursor: "pointer",
-									fontWeight: 500,
-								}}
+								className="bg-red-500 text-white px-4 py-2 rounded-md font-medium"
 							>
 								Delete
 							</button>
 						</Form>
-						
-							<a
-								type="button"
-								href={exhibition.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								style={{
-									background: "#ffe600",
-									color: "black",
-									border: "none",
-									padding: "0.5rem 1rem",
-									borderRadius: "4px",
-									cursor: "pointer",
-									fontWeight: 500,
-								}}
-							>
-								Open website
-							</a>
-						
 					</div>
 				</div>
 			</div>
 
-			<div
-				style={{
-					display: "grid",
-					gridTemplateColumns: "1fr 4fr",
-					gap: "2rem",
-				}}
-			>
-				<div
-					style={{
-						flex: "1 1 400px",
-						overflow: "hidden",
-					}}
-				>
+			<div className="grid grid-cols-[1fr_4fr] gap-4">
+				<div>
 					{exhibition.images.map((image) => (
 						<img
 							key={image.id}
 							alt={`${exhibition.name} exhibition`}
 							src={image.image_url}
-							style={{
-								width: "100%",
-								height: "auto",
-								borderRadius: "8px",
-							}}
+							className="w-full h-auto rounded-md"
 						/>
 					))}
 				</div>
 
-				<div
-					style={{
-						flex: "1 1 400px",
-						display: "flex",
-						flexDirection: "column",
-						gap: "1.5rem",
-					}}
-				>
+				<div className="flex-1 flex flex-col gap-2">
 					<div
 						style={{
 							background: "#f7fafc",
@@ -204,14 +164,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							border: "1px solid #e2e8f0",
 						}}
 					>
-						<h2
-							style={{
-								fontSize: "1.25rem",
-								margin: "0 0 1rem 0",
-								fontWeight: 600,
-								color: "#2d3748",
-							}}
-						>
+						<h2 className="text-2xl font-bold text-gray-800">
 							Exhibition Dates
 						</h2>
 						<div
@@ -235,16 +188,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							border: "1px solid #e2e8f0",
 						}}
 					>
-						<h2
-							style={{
-								fontSize: "1.25rem",
-								margin: "0 0 1rem 0",
-								fontWeight: 600,
-								color: "#2d3748",
-							}}
-						>
-							Private View
-						</h2>
+						<h2 className="text-2xl font-bold text-gray-800">Private View</h2>
 						<div
 							style={{
 								display: "grid",
@@ -271,14 +215,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							border: "1px solid #e2e8f0",
 						}}
 					>
-						<h2
-							style={{
-								fontSize: "1.25rem",
-								margin: "0 0 1rem 0",
-								fontWeight: 600,
-								color: "#2d3748",
-							}}
-						>
+						<h2 className="text-2xl font-bold text-gray-800">
 							Exhibition Description
 						</h2>
 						<div
@@ -300,14 +237,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							border: "1px solid #e2e8f0",
 						}}
 					>
-						<h2
-							style={{
-								fontSize: "1.25rem",
-								margin: "0 0 1rem 0",
-								fontWeight: 600,
-								color: "#2d3748",
-							}}
-						>
+						<h2 className="text-2xl font-bold text-gray-800">
 							Featured Artists
 						</h2>
 						<div
@@ -336,16 +266,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 								border: "1px solid #e2e8f0",
 							}}
 						>
-							<h2
-								style={{
-									fontSize: "1.25rem",
-									margin: "0 0 1rem 0",
-									fontWeight: 600,
-									color: "#2d3748",
-								}}
-							>
-								Website
-							</h2>
+							<h2 className="text-2xl font-bold text-gray-800">Website</h2>
 							<a
 								href={exhibition.url}
 								target="_blank"
@@ -392,14 +313,11 @@ function Favorite({
 	return (
 		<fetcher.Form method="post">
 			<button
+				type="submit"
 				aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
 				name="recommended"
 				value={favorite ? "false" : "true"}
-				style={{
-					cursor: "pointer",
-					fontSize: "1.5rem",
-					color: favorite ? "#f6ad55" : "#a0aec0",
-				}}
+				className="cursor-pointer font-2xl text-2xl"
 			>
 				{favorite ? "★" : "☆"}
 			</button>
