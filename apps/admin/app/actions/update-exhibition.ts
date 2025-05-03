@@ -88,43 +88,20 @@ export const update_description = async (
 
 export const update_featured_artists = async (
 	exhibition_id: number,
-	featured_artists: string[],
+	artist_ids: number[],
 ) => {
-	const current_exhibition_artists = await db.query.exhibition_artists.findMany(
-		{
-			where: eq(exhibition_artists.exhibition_id, exhibition_id),
-		},
-	);
-
+	// First, remove all artist associations for this exhibition
 	await db
 		.delete(exhibition_artists)
 		.where(eq(exhibition_artists.exhibition_id, exhibition_id));
 
-	await db.delete(artists).where(
-		inArray(
-			artists.id,
-			current_exhibition_artists.map((artist) => artist.artist_id),
-		),
-	);
-
-	for (const artist_name of featured_artists) {
-		const trimmed_artist_name = artist_name.trim();
-		if (!trimmed_artist_name) continue;
-
-		const capitalized_artist_name =
-			trimmed_artist_name.charAt(0).toUpperCase() +
-			trimmed_artist_name.slice(1);
-
-		const [new_artist] = await db
-			.insert(artists)
-			.values({ name: capitalized_artist_name })
-			.returning();
-
-		console.log("creating artist relation", new_artist);
-
+	// Then create new relationships for each selected artist ID
+	for (const artist_id of artist_ids) {
+		if (!artist_id) continue;
+		
 		await db.insert(exhibition_artists).values({
 			exhibition_id,
-			artist_id: new_artist.id,
-		});
+			artist_id,
+		}).onConflictDoNothing(); // Prevent duplicate entries
 	}
 };

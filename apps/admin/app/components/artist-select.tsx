@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Form, useSubmit } from "react-router";
 import type { ArtistRecord } from "../data";
 import { Button } from "./button";
 import { inputStyle } from "./image-editor";
@@ -6,13 +7,11 @@ import { inputStyle } from "./image-editor";
 interface ArtistSelectProps {
 	artists?: ArtistRecord[];
 	initialSelectedArtists?: ArtistRecord[];
-	onAddNewArtist?: (name: string, instagram?: string) => Promise<ArtistRecord>;
 }
 
 export function ArtistSelect({
 	artists,
 	initialSelectedArtists = [],
-	onAddNewArtist,
 }: ArtistSelectProps) {
 	const [searchText, setSearchText] = useState("");
 	const [selectedArtists, setSelectedArtists] = useState<number[]>([]);
@@ -23,6 +22,7 @@ export function ArtistSelect({
 	const [newArtistName, setNewArtistName] = useState("");
 	const [newArtistInstagram, setNewArtistInstagram] = useState("");
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const submit = useSubmit();
 
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -64,34 +64,30 @@ export function ArtistSelect({
 	}, []);
 
 	const handleArtistSelect = (artistId: number) => {
-		if (selectedArtists.includes(artistId)) {
-			setSelectedArtists(selectedArtists.filter((id) => id !== artistId));
-		} else {
-			setSelectedArtists([...selectedArtists, artistId]);
-		}
+		setSelectedArtists((prev) => {
+			if (prev.includes(artistId)) {
+				return prev.filter((id) => id !== artistId);
+			}
+			return [...prev, artistId];
+		});
 	};
 
-	const handleAddNewArtist = async () => {
+	const handleAddNewArtist = (e: React.FormEvent) => {
+		e.preventDefault();
 		if (!newArtistName.trim()) return;
 
-		if (onAddNewArtist) {
-			try {
-				const newArtist = await onAddNewArtist(
-					newArtistName,
-					newArtistInstagram || undefined,
-				);
-
-				// Add new artist to selected artists
-				setSelectedArtists([...selectedArtists, newArtist.id]);
-
-				// Reset form
-				setNewArtistName("");
-				setNewArtistInstagram("");
-				setIsAddingNew(false);
-			} catch (error) {
-				console.error("Failed to add new artist:", error);
-			}
+		const formData = new FormData();
+		formData.append("intent", "createArtist");
+		formData.append("name", newArtistName);
+		if (newArtistInstagram) {
+			formData.append("instagram_handle", newArtistInstagram);
 		}
+		submit(formData, { method: "post" });
+
+		// Reset the form
+		setNewArtistName("");
+		setNewArtistInstagram("");
+		setIsAddingNew(false);
 	};
 
 	return (
@@ -167,7 +163,7 @@ export function ArtistSelect({
 							>
 								×
 							</button>
-							{/* Hidden input to submit the selected artist IDs */}
+							{/* Hidden input to submit the selected artist IDs - included in the parent form */}
 							<input type="hidden" name="artist_ids[]" value={artist.id} />
 						</div>
 					) : null;
@@ -176,35 +172,39 @@ export function ArtistSelect({
 			{/* Add New Artist Option */}
 			<div className="p-2 border-b border-gray-200">
 				{isAddingNew ? (
-					<div className="flex gap-4 flex-col">
-						<input
-							type="text"
-							value={newArtistName}
-							onChange={(e) => setNewArtistName(e.target.value)}
-							placeholder="Artist name"
-							className="w-full p-2 border border-gray-300 rounded"
-						/>
-						<input
-							type="text"
-							value={newArtistInstagram}
-							onChange={(e) => setNewArtistInstagram(e.target.value)}
-							placeholder="Instagram handle (optional)"
-							className="w-full p-2 border border-gray-300 rounded"
-						/>
-						<div className="flex gap-4 justify-end">
-							<Button
-								button_type="button"
-								label="Cancel"
-								handler={() => setIsAddingNew(false)}
+					<Form method="POST" action="add-featured-artists">
+						<input type="hidden" name="intent" value="createArtist" />
+						<div className="flex gap-4 flex-col">
+							<input
+								name="name"
+								type="text"
+								value={newArtistName}
+								onChange={(e) => setNewArtistName(e.target.value)}
+								placeholder="Artist name"
+								className="w-full p-2 border border-gray-300 rounded"
 							/>
-							<Button
-								button_type="button"
-								label="Add Artist"
-								handler={handleAddNewArtist}
-								disabled={!newArtistName.trim()}
+							<input
+								name="instagram_handle"
+								type="text"
+								value={newArtistInstagram}
+								onChange={(e) => setNewArtistInstagram(e.target.value)}
+								placeholder="Instagram handle (optional)"
+								className="w-full p-2 border border-gray-300 rounded"
 							/>
+							<div className="flex gap-4 justify-end">
+								<Button
+									button_type="button"
+									label="Cancel"
+									handler={() => setIsAddingNew(false)}
+								/>
+								<Button
+									button_type="submit"
+									label="Add Artist"
+									disabled={!newArtistName.trim()}
+								/>
+							</div>
 						</div>
-					</div>
+					</Form>
 				) : (
 					<button
 						type="button"

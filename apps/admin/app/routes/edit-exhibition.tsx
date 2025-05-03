@@ -80,6 +80,18 @@ export async function action({ params, request }: Route.ActionArgs) {
 						? instagram_handle
 						: undefined,
 				);
+
+				// Get existing selected artist IDs
+				const artist_ids = formData
+					.getAll("artist_ids[]")
+					.map((id) => (typeof id === "string" ? Number(id) : id));
+
+				// Add the newly created artist to the selection
+				const updatedArtistIds = [...(artist_ids as number[]), newArtist.id];
+
+				// Update the exhibition with the new list of artist IDs
+				await update_featured_artists(exhibitionId, updatedArtistIds);
+
 				return { success: true, artist: newArtist };
 			} catch (error) {
 				return { success: false, error: "Failed to create artist" };
@@ -131,22 +143,24 @@ export async function action({ params, request }: Route.ActionArgs) {
 		await update_description(exhibitionId, description);
 	}
 
-	// Handle artist_ids array to get artist names for the existing update_featured_artists function
-	if (
-		artist_ids &&
-		artist_ids.length > 0 &&
-		artist_ids.every((id) => typeof id === "string")
-	) {
-		// Fetch all the selected artists to get their names
-		const allArtists = await getAllArtists();
-		const selectedArtistIds = artist_ids.map((id) => Number(id));
-		const selectedArtists = allArtists.filter((artist) =>
-			selectedArtistIds.includes(artist.id),
-		);
-		const artistNames = selectedArtists.map((artist) => artist.name);
+	// Handle artist IDs for updating featured artists
+	if (intent === "updateFeaturedArtists" || intent === "submit") {
+		const artist_ids = formData.getAll("artist_ids[]");
 
-		// Update with the existing function that expects artist names
-		await update_featured_artists(exhibitionId, artistNames);
+		if (
+			artist_ids.length > 0 &&
+			artist_ids.every((id) => typeof id === "string")
+		) {
+			// Convert string IDs to numbers
+			const selectedArtistIds = artist_ids.map((id) => Number(id));
+
+			// Update with the artist IDs
+			await update_featured_artists(exhibitionId, selectedArtistIds);
+
+			if (intent === "updateFeaturedArtists") {
+				return { success: true };
+			}
+		}
 	}
 
 	// return redirect(`/exhibitions/${exhibitionId}`);
