@@ -5,6 +5,34 @@
 
 declare module "sst" {
   export interface Resource {
+    "Admin": {
+      "type": "sst.aws.React"
+      "url": string
+    }
+    "DLQ": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "OPENAI_API_KEY": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "Postgres": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
+    }
+    "ScraperQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "Vpc": {
+      "bastion": string
+      "type": "sst.aws.Vpc"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />

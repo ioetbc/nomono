@@ -21,4 +21,5 @@ export const blocked_image_domains = ["https://i.vimeocdn.com", "data:image"];
 
 export const blocked_image_extensions = [".svg", ".gif", ".ico"];
 
-export const LOCAL_CHROMIUM_PATH = "/tmp/localChromium/chromium/mac_arm-1452848/chrome-mac/Chromium.app/Contents/MacOS/Chromium";
+export const local_chromium_path =
+	"/tmp/localChromium/chromium/mac_arm-1452848/chrome-mac/Chromium.app/Contents/MacOS/Chromium";

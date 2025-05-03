@@ -1,14 +1,18 @@
 import { openai } from "@ai-sdk/openai";
+import chromium from "@sparticuz/chromium";
 import { generateObject } from "ai";
 import * as cheerio from "cheerio";
 import { format, isAfter } from "date-fns";
-import { type Page } from "puppeteer";
+import type { Page } from "puppeteer";
 import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
 import TurndownService from "turndown";
+import {
+	blocked_image_domains,
+	blocked_image_extensions,
+	local_chromium_path,
+} from "../consts";
 import prompts from "../llm/prompts/index";
 import schemas, { type Event } from "../schema/index";
-import { blocked_image_domains, blocked_image_extensions, LOCAL_CHROMIUM_PATH } from "../consts"
 
 type PageMap = {
 	page: Page | undefined;
@@ -17,7 +21,7 @@ type PageMap = {
 
 export class EventScraper {
 	pages: Map<string, PageMap>;
-	browser: any | undefined
+	browser: any | undefined;
 	current_date: string;
 
 	constructor() {
@@ -32,7 +36,7 @@ export class EventScraper {
 			args: chromium.args,
 			defaultViewport: chromium.defaultViewport,
 			executablePath: process.env.SST_DEV
-				? LOCAL_CHROMIUM_PATH
+				? local_chromium_path
 				: await chromium.executablePath(),
 			headless: chromium.headless,
 		});
@@ -133,12 +137,14 @@ export class EventScraper {
 
 		const image_urls = dom("img")
 			.map((_, img) => {
-				let src;
+				let src: string | undefined;
 				const dataResponsiveSrc = dom(img).attr("data-responsive-src");
 				if (dataResponsiveSrc) {
 					try {
 						const parsedSrc = JSON.parse(dataResponsiveSrc.replace(/'/g, '"'));
-						const breakpoints = Object.keys(parsedSrc).sort((a, b) => parseInt(b) - parseInt(a));
+						const breakpoints = Object.keys(parsedSrc).sort(
+							(a, b) => Number.parseInt(b) - Number.parseInt(a),
+						);
 						src = parsedSrc[breakpoints[0]]; // Choose the largest available breakpoint
 					} catch (error) {
 						console.error("Error parsing data-responsive-src:", error);
@@ -196,13 +202,16 @@ export class EventScraper {
 
 			const updated_events = result.object.events.map((event) => {
 				if (event.event_page_url && !event.event_page_url.startsWith("http")) {
-					event.event_page_url = new URL(event.event_page_url, new URL(url).origin).href;
+					event.event_page_url = new URL(
+						event.event_page_url,
+						new URL(url).origin,
+					).href;
 				}
 
 				return event;
-			})
+			});
 
-			return updated_events
+			return updated_events;
 		} catch (error) {
 			console.error("error calling LLM to find events", error);
 			return [];
@@ -503,10 +512,7 @@ export class EventScraper {
 			const results = await Promise.allSettled(
 				events.map(async (event) => {
 					// filter events instead of this
-					const { should_skip, reason } = await this.block_event(
-						event,
-						[],
-					);
+					const { should_skip, reason } = await this.block_event(event, []);
 
 					if (should_skip) {
 						console.log(`skipping event ${event.name}`, reason);
