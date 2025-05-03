@@ -2,7 +2,9 @@ import { inputStyle } from "./image-editor";
 
 import { labelStyle } from "./image-editor";
 
-export const Description = ({ description }: { description?: string }) => {
+export const Description = ({
+	description,
+}: { description: string | null }) => {
 	if (!description) return null;
 
 	return (

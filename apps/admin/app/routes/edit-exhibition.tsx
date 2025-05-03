@@ -194,14 +194,14 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 			>
 				<div>
 					<div style={labelStyle}>
-						{exhibition.images.length > 0 && (
+						{exhibition?.images && exhibition.images.length > 0 && (
 							<h2 className="text-lg font-semibold mb-4 text-gray-800">
 								Exhibition images
 							</h2>
 						)}
 						<div className="grid grid-cols-[1fr_1fr] gap-4">
-							{exhibition.images.map((image) => (
-								<ImageEditor key={image.id} image={image} />
+							{exhibition.images?.map((image) => (
+								<ImageEditor key={image.caption} image={image} />
 							))}
 						</div>
 						<ImageDropzone />

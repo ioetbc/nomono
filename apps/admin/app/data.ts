@@ -2,7 +2,9 @@
 import sortBy from "sort-by";
 
 import {
+	type Artist,
 	type Exhibition,
+	type Image,
 	artists,
 	create_db,
 	exhibition,
@@ -11,33 +13,13 @@ import {
 } from "@monorepo-template/db";
 import { eq, ilike } from "drizzle-orm";
 
-// Type definitions
-type ExhibitionMutation = {
-	id?: number;
-	name?: string;
-	description?: string;
-	url?: string;
-	gallery_id?: number;
-	recommended?: boolean;
-	start_date?: Date;
-	end_date?: Date;
-	private_view_start_date?: Date;
-	private_view_end_date?: Date;
-	featured_artists?: string[];
+export type ExhibitionRecord = Exhibition & {
+	images?: Image[];
+	featured_artists?: Artist[];
 };
 
-export type ExhibitionRecord = ExhibitionMutation & {
-	id: number;
-	created_at: Date;
-	updated_at: Date;
-	images?: string[];
-	featured_artists?: ArtistRecord[];
-};
-
-// Initialize the database
 const db = create_db();
 
-// Exhibition API functions
 export async function getExhibitions(query?: string | null) {
 	let exhibitionList: Exhibition[] = [];
 
@@ -50,36 +32,12 @@ export async function getExhibitions(query?: string | null) {
 		exhibitionList = await db.select().from(exhibition);
 	}
 
-	// Transform the data to match the expected format
-	const transformedExhibitions: ExhibitionRecord[] = exhibitionList.map(
-		(exhibit) => {
-			return {
-				id: exhibit.id,
-				name: exhibit.name,
-				description: exhibit.description || undefined,
-				start_date: exhibit.start_date
-					? new Date(exhibit.start_date)
-					: undefined,
-				end_date: exhibit.end_date ? new Date(exhibit.end_date) : undefined,
-				private_view_start_date: exhibit.private_view_start_date
-					? new Date(exhibit.private_view_start_date)
-					: undefined,
-				private_view_end_date: exhibit.private_view_end_date
-					? new Date(exhibit.private_view_end_date)
-					: undefined,
-				created_at: new Date(exhibit.created_at),
-				updated_at: new Date(exhibit.updated_at),
-				gallery_id: exhibit.gallery_id || undefined,
-				url: exhibit.url || undefined,
-				recommended: exhibit.recommended || false,
-			};
-		},
-	);
-
-	return transformedExhibitions.sort(sortBy("name", "start_date"));
+	return exhibitionList.sort(sortBy("name", "start_date"));
 }
 
-export async function getDrizzleExhibition(id: number) {
+export async function getDrizzleExhibition(
+	id: number,
+): Promise<ExhibitionRecord | null> {
 	// Use the query builder with relations support
 	const result = await db.query.exhibition.findFirst({
 		where: eq(exhibition.id, id),
@@ -98,22 +56,22 @@ export async function getDrizzleExhibition(id: number) {
 	return {
 		id: result.id,
 		name: result.name,
-		description: result.description || undefined,
-		start_date: result.start_date ? new Date(result.start_date) : undefined,
-		end_date: result.end_date ? new Date(result.end_date) : undefined,
+		description: result.description || null,
+		start_date: result.start_date ? new Date(result.start_date) : null,
+		end_date: result.end_date ? new Date(result.end_date) : null,
 		private_view_start_date: result.private_view_start_date
 			? new Date(result.private_view_start_date)
-			: undefined,
+			: null,
 		private_view_end_date: result.private_view_end_date
 			? new Date(result.private_view_end_date)
-			: undefined,
+			: null,
 		created_at: new Date(result.created_at),
 		updated_at: new Date(result.updated_at),
-		gallery_id: result.gallery_id || undefined,
-		url: result.url || undefined,
+		gallery_id: result.gallery_id || null,
+		url: result.url || null,
 		recommended: result.recommended || false,
 		images: result.images,
-		featured_artists: result.artists,
+		featured_artists: result.artists.map(({ artist }) => artist),
 	};
 }
 
@@ -172,15 +130,15 @@ export async function updateDrizzleExhibition(
 
 		// Only process if there are artists to add
 		if (updates.featured_artists && updates.featured_artists.length > 0) {
-			for (const artistName of updates.featured_artists) {
+			for (const artist of updates.featured_artists) {
 				// Skip empty artist names
-				if (!artistName.trim()) continue;
+				if (!artist.name.trim()) continue;
 
 				// Find or create artist
 				const artistRecord = await db
 					.select()
 					.from(artists)
-					.where(eq(artists.name, artistName))
+					.where(eq(artists.name, artist.name))
 					.limit(1);
 
 				// Use the found artist ID or create a new artist
@@ -190,7 +148,7 @@ export async function updateDrizzleExhibition(
 							await db
 								.insert(artists)
 								.values({
-									name: artistName,
+									name: artist.name,
 									created_at: new Date(),
 								})
 								.returning()
@@ -227,12 +185,7 @@ export type ImageRecord = {
 	created_at: string;
 };
 
-export type ArtistRecord = {
-	id: number;
-	name: string;
-	instagram_handle?: string;
-	created_at: string;
-};
+export type ArtistRecord = Artist;
 
 export type ImageMutation = {
 	exhibition_id: number;
@@ -257,17 +210,10 @@ export async function getImagesForExhibition(
 	}));
 }
 
-export async function getAllArtists(): Promise<ArtistRecord[]> {
+export async function getAllArtists(): Promise<Artist[]> {
 	const artistList = await db.select().from(artists);
 
-	return artistList
-		.map((artist) => ({
-			id: artist.id,
-			name: artist.name,
-			instagram_handle: artist.instagram_handle || undefined,
-			created_at: new Date(artist.created_at).toISOString(),
-		}))
-		.sort((a, b) => a.name.localeCompare(b.name));
+	return artistList.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function createArtist(
@@ -294,8 +240,8 @@ export async function createArtist(
 	return {
 		id: newArtist.id,
 		name: newArtist.name,
-		instagram_handle: newArtist.instagram_handle || undefined,
-		created_at: new Date(newArtist.created_at).toISOString(),
+		instagram_handle: newArtist.instagram_handle || null,
+		created_at: new Date(newArtist.created_at),
 	};
 }
 

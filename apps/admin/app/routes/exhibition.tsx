@@ -1,7 +1,7 @@
 import { Form, useFetcher } from "react-router";
 import { update_recommended } from "~/actions/update-exhibition";
 import { Button } from "~/components/button";
-import { type ExhibitionRecord, getExhibition } from "../data";
+import { getExhibition } from "../data";
 import type { Route } from "./+types/exhibition";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -85,7 +85,7 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							gap: "0.5rem",
 						}}
 					>
-						{exhibition.name} <Favorite exhibition={exhibition} />
+						{exhibition.name} <Favorite recommended={exhibition.recommended} />
 					</h1>
 					<div
 						className="exhibition-actions"
@@ -217,25 +217,30 @@ export default function Exhibition({ loaderData }: Route.ComponentProps) {
 							border: "1px solid #e2e8f0",
 						}}
 					>
-						<h2 className="text-2xl font-bold text-gray-800">
-							Featured Artists
-						</h2>
-						<div
-							style={{
-								display: "grid",
-								gridTemplateColumns: "auto 1fr",
-								gap: "0.5rem 1rem",
-							}}
-						>
-							<span>
+						{exhibition.featured_artists &&
+							exhibition.featured_artists.length > 0 && (
+								<>
+									<h2 className="text-2xl font-bold text-gray-800">
+										Featured Artists
+									</h2>
+									<div
+										style={{
+											display: "grid",
+											gridTemplateColumns: "auto 1fr",
+											gap: "0.5rem 1rem",
+										}}
+									>
+										{/* <span>
 								{exhibition.featured_artists &&
 								exhibition.featured_artists.length > 0
 									? lf.format(
-											exhibition.featured_artists.map((a) => a.artist.name),
+											exhibition.featured_artists.map((a) => a.artist?.name),
 										)
 									: "None"}
-							</span>
-						</div>
+							</span> */}
+									</div>
+								</>
+							)}
 					</div>
 
 					{exhibition.url && (
@@ -283,14 +288,14 @@ export async function action({ params, request }: Route.ActionArgs) {
 }
 
 function Favorite({
-	exhibition,
+	recommended,
 }: {
-	exhibition: ExhibitionRecord;
+	recommended: boolean;
 }) {
 	const fetcher = useFetcher();
 	const favorite = fetcher.formData
 		? fetcher.formData.get("recommended") === "true"
-		: exhibition.recommended;
+		: recommended;
 
 	return (
 		<fetcher.Form method="post">
