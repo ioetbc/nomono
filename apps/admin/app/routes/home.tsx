@@ -56,7 +56,6 @@ export default function Home() {
 							description={card.description}
 							to={card.to}
 							emoji={card.emoji}
-							color={card.color}
 						/>
 					))}
 				</div>
