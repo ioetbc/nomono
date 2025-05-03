@@ -42,7 +42,6 @@ export default function SidebarLayout({ loaderData }: Route.ComponentProps) {
 				<div>
 					<Form
 						id="search-form"
-						role="search"
 						onChange={(event) => {
 							const isFirstSearch = q === null;
 							submit(event.currentTarget, {
