@@ -6,8 +6,9 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
+	index("routes/home.tsx"),
 	layout("layouts/sidebar.tsx", [
-		index("routes/home.tsx"),
+		route("exhibitions", "routes/exhibitions.tsx"),
 		route("exhibitions/:exhibition_id", "routes/exhibition.tsx"),
 		route("exhibitions/:exhibition_id/edit", "routes/edit-exhibition.tsx"),
 		route(
