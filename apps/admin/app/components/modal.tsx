@@ -1,13 +1,9 @@
 import { type DialogHTMLAttributes, type FC, forwardRef } from "react";
-import { useFetcher } from "react-router";
 
 type Props = DialogHTMLAttributes<HTMLDialogElement>;
 
 export const Modal = forwardRef<HTMLDialogElement, Props>(
-	({ children, ...props }, ref) => {
-		const fetcher = useFetcher();
-		const busy = fetcher.state !== "idle";
-
+	({ children }, ref) => {
 		return (
 			<dialog ref={ref} className="modal">
 				<div className="modal-box">
@@ -17,48 +13,7 @@ export const Modal = forwardRef<HTMLDialogElement, Props>(
 						all data on the page will be lost.
 					</p>
 
-					<div className="modal-action flex-col gap-2">
-						<fetcher.Form
-							method="post"
-							action="/artist/create"
-							className="flex gap-2 flex-col"
-						>
-							<input
-								type="text"
-								placeholder="Artist Name"
-								className="input w-full"
-								name="artist_name"
-								required
-							/>
-							<input
-								type="text"
-								placeholder="Artist Instagram"
-								className="input w-full"
-								name="artist_instagram"
-							/>
-							<input
-								type="text"
-								placeholder="Artist Website"
-								className="input w-full"
-								name="artist_website"
-							/>
-
-							<button type="submit" className="btn btn-primary">
-								{busy ? "Saving..." : "Save"}
-							</button>
-							<button
-								type="button"
-								className="btn btn-ghost"
-								onClick={() => {
-									if (ref && "current" in ref && ref.current) {
-										ref.current.close();
-									}
-								}}
-							>
-								Close
-							</button>
-						</fetcher.Form>
-					</div>
+					<div className="modal-action flex-col gap-2">{children}</div>
 				</div>
 			</dialog>
 		);
@@ -79,7 +34,7 @@ type FooterProps = {
 
 export const Footer: FC<FooterProps> = ({ children }) => {
 	return (
-		<section className="w-full flex justify-end gap-2">{children}</section>
+		<section className="w-full flex justify-center gap-2">{children}</section>
 	);
 };
 
