@@ -7,8 +7,8 @@ import {
 import { inputStyle, labelStyle, labelTextStyle } from "./image-editor";
 
 interface PrivateViewProps {
-	startDate?: ExhibitionRecord["private_view_start_date"];
-	endDate?: ExhibitionRecord["private_view_end_date"];
+	startDate: ExhibitionRecord["private_view_start_date"] | null;
+	endDate: ExhibitionRecord["private_view_end_date"] | null;
 }
 
 export function PrivateView({ startDate, endDate }: PrivateViewProps) {

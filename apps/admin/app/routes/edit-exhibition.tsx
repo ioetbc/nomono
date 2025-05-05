@@ -20,7 +20,6 @@ import { ImageDropzone } from "~/components/image-dropzone";
 import { ImageEditor, labelStyle } from "~/components/image-editor";
 import { PrivateView } from "~/components/private-view";
 import {
-	createArtist,
 	createImage,
 	deleteImage,
 	getAllArtists,
@@ -34,8 +33,8 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 	console.log("params", params);
 
-	const exhibitionId = Number(params.exhibition_id);
-	if (Number.isNaN(exhibitionId)) {
+	const exhibition_id = Number(params.exhibition_id);
+	if (Number.isNaN(exhibition_id)) {
 		throw new Response("Invalid exhibition ID", { status: 400 });
 	}
 
@@ -59,7 +58,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 		if (imageUrl && typeof imageUrl === "string") {
 			await createImage({
-				exhibition_id: exhibitionId,
+				exhibition_id: exhibition_id,
 				image_url: imageUrl,
 				caption: caption.toString(),
 			});
@@ -68,37 +67,37 @@ export async function action({ params, request }: Route.ActionArgs) {
 		return { success: false };
 	}
 
-	if (intent === "createArtist") {
-		const name = formData.get("name");
-		const instagram_handle = formData.get("instagram_handle");
+	// if (intent === "createArtist") {
+	// 	const name = formData.get("name");
+	// 	const instagram_handle = formData.get("instagram_handle");
 
-		if (name && typeof name === "string") {
-			try {
-				const newArtist = await createArtist(
-					name,
-					instagram_handle && typeof instagram_handle === "string"
-						? instagram_handle
-						: undefined,
-				);
+	// 	if (name && typeof name === "string") {
+	// 		try {
+	// 			const newArtist = await createArtist(
+	// 				name,
+	// 				instagram_handle && typeof instagram_handle === "string"
+	// 					? instagram_handle
+	// 					: undefined,
+	// 			);
 
-				// Get existing selected artist IDs
-				const artist_ids = formData
-					.getAll("artist_ids[]")
-					.map((id) => (typeof id === "string" ? Number(id) : id));
+	// 			// Get existing selected artist IDs
+	// 			const artist_ids = formData
+	// 				.getAll("artist_ids[]")
+	// 				.map((id) => (typeof id === "string" ? Number(id) : id));
 
-				// Add the newly created artist to the selection
-				const updatedArtistIds = [...(artist_ids as number[]), newArtist.id];
+	// 			// Add the newly created artist to the selection
+	// 			const updatedArtistIds = [...(artist_ids as number[]), newArtist.id];
 
-				// Update the exhibition with the new list of artist IDs
-				await update_featured_artists(exhibitionId, updatedArtistIds);
+	// 			// Update the exhibition with the new list of artist IDs
+	// 			await update_featured_artists(exhibitionId, updatedArtistIds);
 
-				return { success: true, artist: newArtist };
-			} catch (error) {
-				return { success: false, error: "Failed to create artist" };
-			}
-		}
-		return { success: false, error: "Artist name is required" };
-	}
+	// 			return { success: true, artist: newArtist };
+	// 		} catch (error) {
+	// 			return { success: false, error: "Failed to create artist" };
+	// 		}
+	// 	}
+	// 	return { success: false, error: "Artist name is required" };
+	// }
 
 	const exhibition_name = formData.get("exhibition_name");
 	const exhibition_url = formData.get("exhibition_url");
@@ -109,59 +108,66 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const description = formData.get("description");
 
 	// Get artist_ids instead of featured_artists strings
-	const artist_ids = formData.getAll("artist_ids[]");
+	const featured_artists_name = formData.getAll("featured_artists_name");
 
 	if (exhibition_name && typeof exhibition_name === "string") {
-		await update_exhibition_name(exhibitionId, exhibition_name);
+		await update_exhibition_name(exhibition_id, exhibition_name);
 	}
 
 	if (exhibition_url && typeof exhibition_url === "string") {
-		await update_exhibition_url(exhibitionId, exhibition_url);
+		await update_exhibition_url(exhibition_id, exhibition_url);
 	}
 
 	if (start_date && typeof start_date === "string") {
 		const date = new Date(start_date);
-		await update_start_date(exhibitionId, date);
+		await update_start_date(exhibition_id, date);
 	}
 
 	if (end_date && typeof end_date === "string") {
 		const date = new Date(end_date);
-		await update_end_date(exhibitionId, date);
+		await update_end_date(exhibition_id, date);
 	}
 
 	if (private_view_start_date && typeof private_view_start_date === "string") {
 		const date = new Date(private_view_start_date);
-		await update_private_view_start_date(exhibitionId, date);
+		await update_private_view_start_date(exhibition_id, date);
 	}
 
 	if (private_view_end_date && typeof private_view_end_date === "string") {
 		const date = new Date(private_view_end_date);
-		await update_private_view_end_date(exhibitionId, date);
+		await update_private_view_end_date(exhibition_id, date);
 	}
 
 	if (description && typeof description === "string") {
-		await update_description(exhibitionId, description);
+		await update_description(exhibition_id, description);
+	}
+
+	if (
+		featured_artists_name.length > 0 &&
+		typeof featured_artists_name === "string"
+	) {
+		await update_featured_artists(exhibition_id, featured_artists_name);
 	}
 
 	// Handle artist IDs for updating featured artists
-	if (intent === "updateFeaturedArtists" || intent === "submit") {
-		const artist_ids = formData.getAll("artist_ids[]");
+	// if (intent === "updateFeaturedArtists" || intent === "submit") {
+	// 	const artist_ids = formData.getAll("artist_ids[]");
 
-		if (
-			artist_ids.length > 0 &&
-			artist_ids.every((id) => typeof id === "string")
-		) {
-			// Convert string IDs to numbers
-			const selectedArtistIds = artist_ids.map((id) => Number(id));
+	// 	if (
+	// 		artist_ids.length > 0 &&
+	// 		artist_ids.every((id) => typeof id === "string")
+	// 	) {
+	// 		// Convert string IDs to numbers
+	// 		const selectedArtistIds = artist_ids.map((id) => Number(id));
 
-			// Update with the artist IDs
-			await update_featured_artists(exhibitionId, selectedArtistIds);
+	// 		// Update with the artist IDs
+	// 		await update_featured_artists(exhibitionId, selectedArtistIds);
 
-			if (intent === "updateFeaturedArtists") {
-				return { success: true };
-			}
-		}
-	}
+	// 		if (intent === "updateFeaturedArtists") {
+	// 			return { success: true };
+	// 		}
+	// 	}
+	// }
 
 	// return redirect(`/exhibitions/${exhibitionId}`);
 }
@@ -211,8 +217,8 @@ export default function EditExhibition({ loaderData }: Route.ComponentProps) {
 					<ExhibitionName name={exhibition.name} />
 
 					<FeaturedArtists
-						initialArtists={exhibition.featured_artists}
-						allArtists={allArtists}
+						selected_artists={exhibition.featured_artists}
+						all_artists={allArtists}
 					/>
 
 					<ExhibitionUrl url={exhibition.url} />

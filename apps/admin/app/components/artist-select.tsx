@@ -5,18 +5,18 @@ import { Button } from "./button";
 import { inputStyle } from "./image-editor";
 
 interface ArtistSelectProps {
-	artists?: ArtistRecord[];
-	initialSelectedArtists?: ArtistRecord[];
+	all_artists?: ArtistRecord[];
+	selected_artists?: ArtistRecord[];
 }
 
 export function ArtistSelect({
-	artists,
-	initialSelectedArtists = [],
+	all_artists,
+	selected_artists = [],
 }: ArtistSelectProps) {
 	const [searchText, setSearchText] = useState("");
 	const [selectedArtists, setSelectedArtists] = useState<number[]>([]);
 	const [filteredArtists, setFilteredArtists] = useState<ArtistRecord[]>(
-		artists ?? [],
+		all_artists ?? [],
 	);
 	const [isAddingNew, setIsAddingNew] = useState(false);
 	const [newArtistName, setNewArtistName] = useState("");
@@ -28,23 +28,23 @@ export function ArtistSelect({
 
 	// Set initial selected artists
 	useEffect(() => {
-		if (initialSelectedArtists && initialSelectedArtists.length > 0) {
-			setSelectedArtists(initialSelectedArtists.map((a) => a.id));
+		if (selected_artists && selected_artists.length > 0) {
+			setSelectedArtists(selected_artists.map((a) => a.id));
 		}
-	}, [initialSelectedArtists]);
+	}, [selected_artists]);
 
 	// Filter artists based on search text
 	useEffect(() => {
 		if (searchText.trim() === "") {
-			setFilteredArtists(artists ?? []);
+			setFilteredArtists(all_artists ?? []);
 		} else {
 			const lowercaseSearch = searchText.toLowerCase();
-			const filtered = (artists ?? []).filter((artist) =>
+			const filtered = (all_artists ?? []).filter((artist) =>
 				artist.name.toLowerCase().includes(lowercaseSearch),
 			);
 			setFilteredArtists(filtered);
 		}
-	}, [searchText, artists]);
+	}, [searchText, all_artists]);
 
 	// Close dropdown when clicking outside
 	useEffect(() => {
@@ -149,7 +149,7 @@ export function ArtistSelect({
 			</div>
 			<div className="flex flex-wrap gap-2 mb-2">
 				{selectedArtists.map((artistId) => {
-					const artist = artists?.find((a) => a.id === artistId);
+					const artist = all_artists?.find((a) => a.id === artistId);
 					return artist ? (
 						<div
 							key={artist.id}

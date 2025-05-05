@@ -1,10 +1,5 @@
-import {
-	artists,
-	db,
-	exhibition,
-	exhibition_artists,
-} from "@monorepo-template/db";
-import { eq, inArray } from "drizzle-orm";
+import { db, exhibition, exhibition_artists } from "@monorepo-template/db";
+import { eq } from "drizzle-orm";
 
 export const update_exhibition_name = async (
 	exhibition_id: number,
@@ -88,20 +83,31 @@ export const update_description = async (
 
 export const update_featured_artists = async (
 	exhibition_id: number,
-	artist_ids: number[],
+	featured_artists_name: string[],
 ) => {
+	// get current artists tied to exhibition
+	const current_artists = await db
+		.select()
+		.from(exhibition_artists)
+		.where(eq(exhibition_artists.exhibition_id, exhibition_id));
+
+	// remove current artists from artist_ids
+
 	// First, remove all artist associations for this exhibition
 	await db
 		.delete(exhibition_artists)
 		.where(eq(exhibition_artists.exhibition_id, exhibition_id));
 
 	// Then create new relationships for each selected artist ID
-	for (const artist_id of artist_ids) {
-		if (!artist_id) continue;
-		
-		await db.insert(exhibition_artists).values({
-			exhibition_id,
-			artist_id,
-		}).onConflictDoNothing(); // Prevent duplicate entries
-	}
+	// for (const artist_id of artist_ids) {
+	// 	if (!artist_id) continue;
+
+	// 	await db
+	// 		.insert(exhibition_artists)
+	// 		.values({
+	// 			exhibition_id,
+	// 			artist_id,
+	// 		})
+	// 		.onConflictDoNothing(); // Prevent duplicate entries
+	// }
 };
