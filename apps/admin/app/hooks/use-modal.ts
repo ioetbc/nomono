@@ -1,39 +1,36 @@
 import { useRef } from "react";
 
 export const useModal = () => {
-	const modalRef = useRef<HTMLDialogElement | null>(null);
-	const formRef = useRef<HTMLFormElement | null>(null);
+	const modal_ref = useRef<HTMLDialogElement | null>(null);
+	const form_ref = useRef<HTMLFormElement | null>(null);
 
 	const reset = () => {
-		if (!formRef.current) return;
-		formRef.current.reset();
+		if (!form_ref.current) return;
+		form_ref.current.reset();
 	};
 
 	const open = () => {
-		console.log("modalRef.current", modalRef.current);
-		if (!modalRef.current) return;
-		modalRef.current.showModal();
+		if (!modal_ref.current) return;
+		modal_ref.current.showModal();
 	};
 
 	const close = () => {
-		if (!modalRef.current) return;
-		modalRef.current.close();
+		if (!modal_ref.current) return;
+		modal_ref.current.close();
 	};
 
 	const toggle = () => {
-		console.log("modalRef toggle", modalRef.current?.open);
-
-		if (!modalRef.current) return;
-		!modalRef.current.open ? open() : close();
+		if (!modal_ref.current) return;
+		!modal_ref.current.open ? open() : close();
 	};
 
 	return {
-		modalRef,
-		formRef,
+		modal_ref,
+		form_ref,
 		reset,
 		open,
 		close,
 		toggle,
-		isOpen: modalRef.current?.open || false,
+		is_open: modal_ref.current?.open || false,
 	};
 };

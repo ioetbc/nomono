@@ -1,23 +1,65 @@
 import { type DialogHTMLAttributes, type FC, forwardRef } from "react";
+import { useFetcher } from "react-router";
 
-type Props = {} & DialogHTMLAttributes<HTMLDialogElement>;
+type Props = DialogHTMLAttributes<HTMLDialogElement>;
 
 export const Modal = forwardRef<HTMLDialogElement, Props>(
 	({ children, ...props }, ref) => {
+		const fetcher = useFetcher();
+		const busy = fetcher.state !== "idle";
+
 		return (
-			<dialog
-				ref={ref}
-				className="relative min-w-56 min-h-56 p-4 rounded-md"
-				id="modal"
-				{...props}
-			>
-				<form
-					id="modal-form"
-					method="dialog"
-					className="w-full h-full flex flex-col gap-4 items-center justify-between"
-				>
-					{children}
-				</form>
+			<dialog ref={ref} className="modal">
+				<div className="modal-box">
+					<h3 className="font-bold text-lg">Add a new artist</h3>
+					<p className="py-4">
+						Use the form below to add a new artist to the database. Note that
+						all data on the page will be lost.
+					</p>
+
+					<div className="modal-action flex-col gap-2">
+						<fetcher.Form
+							method="post"
+							action="/artist/create"
+							className="flex gap-2 flex-col"
+						>
+							<input
+								type="text"
+								placeholder="Artist Name"
+								className="input w-full"
+								name="artist_name"
+								required
+							/>
+							<input
+								type="text"
+								placeholder="Artist Instagram"
+								className="input w-full"
+								name="artist_instagram"
+							/>
+							<input
+								type="text"
+								placeholder="Artist Website"
+								className="input w-full"
+								name="artist_website"
+							/>
+
+							<button type="submit" className="btn btn-primary">
+								{busy ? "Saving..." : "Save"}
+							</button>
+							<button
+								type="button"
+								className="btn btn-ghost"
+								onClick={() => {
+									if (ref && "current" in ref && ref.current) {
+										ref.current.close();
+									}
+								}}
+							>
+								Close
+							</button>
+						</fetcher.Form>
+					</div>
+				</div>
 			</dialog>
 		);
 	},

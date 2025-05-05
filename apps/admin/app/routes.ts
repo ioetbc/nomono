@@ -11,11 +11,9 @@ export default [
 		route("exhibitions", "routes/exhibitions.tsx"),
 		route("exhibitions/:exhibition_id", "routes/exhibition.tsx"),
 		route("exhibitions/:exhibition_id/edit", "routes/edit-exhibition.tsx"),
-		route(
-			"exhibitions/:exhibition_id/destroy",
-			"routes/destroy-exhibition.tsx",
-		),
 	]),
 	route("about", "routes/about.tsx"),
 	route("scrape", "routes/scrape.tsx"),
+	route("exhibitions/:exhibition_id/destroy", "routes/destroy-exhibition.tsx"),
+	route("artist/create", "routes/create-artist.tsx"),
 ] satisfies RouteConfig;

@@ -12,7 +12,7 @@ export function FeaturedArtists({
 	selected_artists,
 	all_artists,
 }: FeaturedArtistsProps) {
-	const { toggle, reset, modalRef } = useModal();
+	const { toggle, reset, modal_ref } = useModal();
 
 	return (
 		<div className="p-4 rounded-lg border border-gray-200 bg-white">
@@ -20,16 +20,26 @@ export function FeaturedArtists({
 				Featured Artists
 			</h2>
 			<Button button_type="button" handler={toggle} label="Open Modal" />
-			<Modal ref={modalRef}>
+			<Modal ref={modal_ref}>
 				<Title>Featured Artists</Title>
-				<Field name="Featured Artists">
-					<input type="text" name="featured_artists_name" />
-				</Field>
 				<Body>
-					<p>hello</p>
+					<Field name="Artist name">
+						<input type="text" name="featured_artists_name" />
+					</Field>
+					<Field name="Artist Instagram">
+						<input type="text" name="featured_artists_instagram" />
+					</Field>
+					<Field name="Artist Website">
+						<input type="text" name="featured_artists_website" />
+					</Field>
 				</Body>
 				<Footer>
-					<Button button_type="button" handler={reset} label="Close Modal" />
+					<button type="button" onClick={toggle} className="btn btn-ghost">
+						Close
+					</button>
+					<button type="submit" className="btn btn-primary">
+						Submit
+					</button>
 				</Footer>
 			</Modal>
 		</div>
